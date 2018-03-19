@@ -1,0 +1,60 @@
+title: |-
+  Android Lint
+summary: |
+  Runs lint gradle task on your project.
+description: |
+  Runs lint gradle task on your project.
+website: https://github.com/bitrise-steplib/bitrise-step-android-lint
+source_code_url: https://github.com/bitrise-steplib/bitrise-step-android-lint
+support_url: https://github.com/bitrise-steplib/bitrise-step-android-lint/issues
+host_os_tags:
+  - osx-10.10
+  - ubuntu-16.04
+
+project_type_tags:
+  - android
+  - react-native
+
+type_tags:
+  - test
+
+is_requires_admin_user: true
+is_always_run: false
+is_skippable: false
+
+toolkit:
+  go:
+    package_name: github.com/bitrise-steplib/bitrise-step-android-lint
+
+inputs:
+  - project_location: $BITRISE_SOURCE_DIR
+    opts:
+      title: Project Location
+      summary: A project in Android Studio contains everything that defines your workspace for an app (gradlew, settings.gradle), from source code and assets, to test code and build configurations.
+      description: A project in Android Studio contains everything that defines your workspace for an app (gradlew, settings.gradle), from source code and assets, to test code and build configurations.
+      is_required: true
+  - module: ""
+    opts:
+      title: Module
+      summary: |
+        Set the module that you want to lint. To see your available modules please open your project in Android Studio and go in [Project Structure] and see the list on the left.
+      description: |
+        Set the module that you want to lint. To see your available modules please open your project in Android Studio and go in [Project Structure] and see the list on the left.
+      is_required: false
+  - variant: ""
+    opts:
+      title: Variant
+      summary: |
+        Set the variant that you want to lint. To see your available variants please open your project in Android Studio and go in [Project Structure] -> variants section.
+      description: |
+        Set the variant that you want to lint. To see your available variants please open your project in Android Studio and go in [Project Structure] -> variants section.
+      is_required: false
+  - report_path_pattern: "*/build/reports/lint-results*.html"
+    opts:
+      category: Report Export Options
+      title: Report location pattern
+      summary: |
+        Will find the report file with the given pattern. If you need the xml file then you can use: "*/build/reports/lint-results*.xml"
+      description: |
+        Will find the report file with the given pattern. If you need the xml file then you can use: "*/build/reports/lint-results*.xml"
+      is_required: true
