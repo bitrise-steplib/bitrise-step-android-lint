@@ -12,4 +12,4 @@ Android Studio provides a code scanning tool called lint that can help you to id
 
 ### Usage
 
-...
+..
