@@ -16,7 +16,7 @@ type Artifact struct {
 func extractArtifactName(project Project, path string) (string, error) {
 	location := project.location
 
-	if !project.monoRepo {
+	if project.monoRepo {
 		location = filepath.Join(project.location, "..")
 	}
 
@@ -34,7 +34,7 @@ func extractArtifactName(project Project, path string) (string, error) {
 		s := strings.Split(relPath, "/")
 		module := s[0]
 
-		if !project.monoRepo && len(s) > 1 {
+		if project.monoRepo && len(s) > 1 {
 			module += "-" + s[1]
 		}
 

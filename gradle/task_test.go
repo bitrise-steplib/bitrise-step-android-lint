@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestTask_parseVariants(t *testing.T) {
+func TestTaskParseVariants(t *testing.T) {
 	type fields struct {
 		name   string
 		module Module

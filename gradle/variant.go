@@ -17,16 +17,16 @@ func (variants Variants) Filter(filter string) Variants {
 		return variants
 	}
 
-	t := []string{}
-	for _, v := range variants {
-		for _, f := range cleanedFilters {
-			f = strings.ToLower(f)
-			if strings.Contains(strings.ToLower(v), f) {
-				if !sliceutil.IsStringInSlice(v, t) {
-					t = append(t, v)
+	cleanedVariants := []string{}
+	for _, variant := range variants {
+		for _, filter := range cleanedFilters {
+			filter = strings.ToLower(filter)
+			if strings.Contains(strings.ToLower(variant), filter) {
+				if !sliceutil.IsStringInSlice(variant, cleanedVariants) {
+					cleanedVariants = append(cleanedVariants, variant)
 				}
 			}
 		}
 	}
-	return t
+	return cleanedVariants
 }

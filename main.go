@@ -62,7 +62,7 @@ func main() {
 
 	for _, variant := range variants {
 		if sliceutil.IsStringInSlice(variant, filteredVariants) {
-			log.Donef("- %s ✓", variant)
+			log.Donef("✓ %s", variant)
 		} else {
 			log.Printf("- %s", variant)
 		}

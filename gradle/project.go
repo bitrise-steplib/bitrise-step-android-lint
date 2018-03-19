@@ -49,7 +49,7 @@ func NewProject(location string) (Project, error) {
 		}
 	}
 
-	return Project{location: location, monoRepo: (projectsCount < 2)}, nil
+	return Project{location: location, monoRepo: (projectsCount >= 2)}, nil
 }
 
 // SetModule ...

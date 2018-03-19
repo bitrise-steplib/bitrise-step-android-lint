@@ -2,7 +2,7 @@ package gradle
 
 import "testing"
 
-func Test_extractArtifactName(t *testing.T) {
+func TestExtractArtifactName(t *testing.T) {
 	type args struct {
 		project Project
 		path    string
@@ -14,18 +14,9 @@ func Test_extractArtifactName(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			"empty_projpath",
-			args{
-				project: Project{location: "", monoRepo: true},
-				path:    "myartifact.html",
-			},
-			"myartifact.html",
-			false,
-		},
-		{
 			"in_module_projpath",
 			args{
-				project: Project{location: "root_dir", monoRepo: false},
+				project: Project{location: "root_dir", monoRepo: true},
 				path:    "root_dir/mymodule/build/reports/myartifact.html",
 			},
 			"root_dir-mymodule-myartifact.html",
@@ -34,8 +25,8 @@ func Test_extractArtifactName(t *testing.T) {
 		{
 			"outside",
 			args{
-				project: Project{location: "root_dir", monoRepo: true},
-				path:    "root_dir/../randomdir/build/reports/myartifact.html",
+				project: Project{location: "root_dir", monoRepo: false},
+				path:    "randomdir/build/reports/myartifact.html",
 			},
 			"myartifact.html",
 			false,

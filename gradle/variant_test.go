@@ -5,42 +5,33 @@ import (
 	"testing"
 )
 
-func TestVariants_Filter(t *testing.T) {
-	type args struct {
-		filter string
-	}
+func TestVariantsFilter(t *testing.T) {
 	tests := []struct {
 		name     string
 		variants Variants
-		args     args
+		filter   string
 		want     Variants
 	}{
 		{
 			"empty",
 			sampleVariants,
-			args{
-				filter: ``,
-			},
+			``,
 			sampleVariants,
 		},
 		{
 			"only_newlines",
 			sampleVariants,
-			args{
-				filter: `
+			`
 				
 				
 				
 				`,
-			},
 			sampleVariants,
 		},
 		{
 			"only_match",
 			sampleVariants,
-			args{
-				filter: `stage`,
-			},
+			`stage`,
 			Variants{
 				"InvArm7StageDebug",
 				"InvArm7StageRelease",
@@ -51,13 +42,11 @@ func TestVariants_Filter(t *testing.T) {
 		{
 			"match_and_newlines",
 			sampleVariants,
-			args{
-				filter: `
+			`
 				stage
 				
 				
 				`,
-			},
 			Variants{
 				"InvArm7StageDebug",
 				"InvArm7StageRelease",
@@ -68,12 +57,10 @@ func TestVariants_Filter(t *testing.T) {
 		{
 			"match_multiple_times_and_newlines",
 			sampleVariants,
-			args{
-				filter: `
+			`
 				stage
 				
 				stage`,
-			},
 			Variants{
 				"InvArm7StageDebug",
 				"InvArm7StageRelease",
@@ -84,13 +71,11 @@ func TestVariants_Filter(t *testing.T) {
 		{
 			"multiple_match_multiple_times_and_newlines",
 			sampleVariants,
-			args{
-				filter: `
+			`
 				stage
 				
 				stage
 				staging`,
-			},
 			Variants{
 				"Myflavor2Staging",
 				"MyflavorokStaging",
@@ -104,7 +89,7 @@ func TestVariants_Filter(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.variants.Filter(tt.args.filter); !reflect.DeepEqual(got, tt.want) {
+			if got := tt.variants.Filter(tt.filter); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Variants.Filter() = %v, want %v", got, tt.want)
 			}
 		})
