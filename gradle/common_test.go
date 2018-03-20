@@ -3,23 +3,12 @@ package gradle
 import (
 	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestCleanStringSlice(t *testing.T) {
-	tests := []struct {
-		name string
-		in   []string
-		want []string
-	}{
-		{"empty", []string{"", ""}, []string{}},
-		{"one_empty", []string{"", "test"}, []string{"test"}},
-		{"one_empty_w/_space", []string{"", "   space "}, []string{"space"}},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := cleanStringSlice(tt.in); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("cleanStringSlice() = %v, want %v", got, tt.want)
-			}
-		})
-	}
+	require.Equal(t, true, reflect.DeepEqual(cleanStringSlice([]string{"", ""}), []string{}))
+	require.Equal(t, true, reflect.DeepEqual(cleanStringSlice([]string{"", "test"}), []string{"test"}))
+	require.Equal(t, true, reflect.DeepEqual(cleanStringSlice([]string{"", "   space "}), []string{"space"}))
 }

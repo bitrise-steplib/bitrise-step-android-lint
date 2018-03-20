@@ -3,23 +3,22 @@ package gradle
 import (
 	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestVariantsFilter(t *testing.T) {
-	tests := []struct {
-		name     string
-		variants Variants
-		filter   string
-		want     Variants
+	for name, data := range map[string]struct {
+		inputVariants Variants
+		filter        string
+		want          Variants
 	}{
-		{
-			"empty",
+		"empty": {
 			sampleVariants,
 			``,
 			sampleVariants,
 		},
-		{
-			"only_newlines",
+		"only_newlines": {
 			sampleVariants,
 			`
 				
@@ -28,8 +27,7 @@ func TestVariantsFilter(t *testing.T) {
 				`,
 			sampleVariants,
 		},
-		{
-			"only_match",
+		"only_match": {
 			sampleVariants,
 			`stage`,
 			Variants{
@@ -39,8 +37,7 @@ func TestVariantsFilter(t *testing.T) {
 				"InvX86StageRelease",
 			},
 		},
-		{
-			"match_and_newlines",
+		"match_and_newlines": {
 			sampleVariants,
 			`
 				stage
@@ -54,8 +51,7 @@ func TestVariantsFilter(t *testing.T) {
 				"InvX86StageRelease",
 			},
 		},
-		{
-			"match_multiple_times_and_newlines",
+		"match_multiple_times_and_newlines": {
 			sampleVariants,
 			`
 				stage
@@ -68,8 +64,8 @@ func TestVariantsFilter(t *testing.T) {
 				"InvX86StageRelease",
 			},
 		},
-		{
-			"multiple_match_multiple_times_and_newlines",
+
+		"multiple_match_multiple_times_and_newlines": {
 			sampleVariants,
 			`
 				stage
@@ -86,13 +82,8 @@ func TestVariantsFilter(t *testing.T) {
 				"InvX86StageRelease",
 			},
 		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.variants.Filter(tt.filter); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Variants.Filter() = %v, want %v", got, tt.want)
-			}
-		})
+	} {
+		require.Equal(t, true, reflect.DeepEqual(data.inputVariants.Filter(data.filter), data.want), name)
 	}
 }
 

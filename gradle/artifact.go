@@ -14,34 +14,20 @@ type Artifact struct {
 }
 
 func extractArtifactName(project Project, path string) (string, error) {
-	location := project.location
-
-	if project.monoRepo {
-		location = filepath.Join(project.location, "..")
-	}
-
-	relPath, err := filepath.Rel(location, path)
+	relPath, err := filepath.Rel(project.location, path)
 	if err != nil {
 		return "", err
 	}
 
-	s := strings.Split(relPath, "/")
-	suffix := s[len(s)-1]
+	module := strings.Split(relPath, "/")[0]
+	fileName := filepath.Base(relPath)
 
-	// return with filename only if user decided to have
-	// the result files outside of the project dir
-	if !strings.HasPrefix(relPath, "..") && project.location != "." && project.location != "" {
-		s := strings.Split(relPath, "/")
-		module := s[0]
-
-		if project.monoRepo && len(s) > 1 {
-			module += "-" + s[1]
-		}
-
-		return module + "-" + suffix, nil
+	if project.monoRepo {
+		splitPath := strings.Split(project.location, "/")
+		module = splitPath[len(splitPath)-1] + "-" + module
 	}
 
-	return suffix, nil
+	return module + "-" + fileName, nil
 }
 
 // Export ...

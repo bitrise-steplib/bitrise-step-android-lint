@@ -3,67 +3,45 @@ package gradle
 import (
 	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestTaskParseVariants(t *testing.T) {
-	type fields struct {
-		name   string
-		module Module
-	}
-	type args struct {
-		gradleOutput string
-	}
-	tests := []struct {
-		name   string
-		fields fields
-		args   args
-		want   Variants
-	}{
-		{
-			"emptyModule",
-			fields{
-				name: "lint",
-				module: Module{
-					name: "",
-				},
-			},
-			args{gradleOutput: sampleGradleOutput},
-			[]string{
-				"Myflavor2Debug",
-				"Myflavor2Release",
-				"Myflavor2Staging",
-				"MyflavorDebug",
-				"MyflavorokDebug",
-				"MyflavorokRelease",
-				"MyflavorokStaging",
-				"MyflavorRelease",
-				"MyflavorStaging",
-				"InvArm7LocalDebug",
-				"InvArm7LocalRelease",
-				"InvArm7ProdDebug",
-				"InvArm7ProdRelease",
-				"InvArm7StageDebug",
-				"InvArm7StageRelease",
-				"InvX86LocalDebug",
-				"InvX86LocalRelease",
-				"InvX86ProdDebug",
-				"InvX86ProdRelease",
-				"InvX86StageDebug",
-				"InvX86StageRelease",
-			},
+	task := &Task{
+		name: "lint",
+		module: Module{
+			name: "",
 		},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			task := &Task{
-				name:   tt.fields.name,
-				module: tt.fields.module,
-			}
-			if got := task.parseVariants(tt.args.gradleOutput); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Task.parseVariants() = %#v, want %#v", got, tt.want)
-			}
-		})
+
+	parsedVariants := task.parseVariants(sampleGradleOutput)
+
+	expected := Variants{
+		"Myflavor2Debug",
+		"Myflavor2Release",
+		"Myflavor2Staging",
+		"MyflavorDebug",
+		"MyflavorokDebug",
+		"MyflavorokRelease",
+		"MyflavorokStaging",
+		"MyflavorRelease",
+		"MyflavorStaging",
+		"InvArm7LocalDebug",
+		"InvArm7LocalRelease",
+		"InvArm7ProdDebug",
+		"InvArm7ProdRelease",
+		"InvArm7StageDebug",
+		"InvArm7StageRelease",
+		"InvX86LocalDebug",
+		"InvX86LocalRelease",
+		"InvX86ProdDebug",
+		"InvX86ProdRelease",
+		"InvX86StageDebug",
+		"InvX86StageRelease",
 	}
+
+	require.Equal(t, true, reflect.DeepEqual(expected, parsedVariants))
 }
 
 const sampleGradleOutput = `
