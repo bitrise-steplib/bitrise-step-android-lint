@@ -27,8 +27,8 @@ inputs:
   - project_location: $BITRISE_SOURCE_DIR
     opts:
       title: Project Location
-      summary: A project in Android Studio contains everything that defines your workspace for an app (gradlew, settings.gradle), from source code and assets, to test code and build configurations.
-      description: A project in Android Studio contains everything that defines your workspace for an app (gradlew, settings.gradle), from source code and assets, to test code and build configurations.
+      summary: "The root directory of your android project, e.g.: where your root build gradle file exist (also gradlew, settings.gradle, etc...)"
+      description: "The root directory of your android project, e.g.: where your root build gradle file exist (also gradlew, settings.gradle, etc...)"
       is_required: true
   - module: ""
     opts:
