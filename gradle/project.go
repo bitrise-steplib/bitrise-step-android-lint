@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/bitrise-io/depman/pathutil"
@@ -20,6 +21,12 @@ type Project struct {
 
 // NewProject ...
 func NewProject(location string) (Project, error) {
+	var err error
+	location, err = filepath.Abs(location)
+	if err != nil {
+		return Project{}, err
+	}
+
 	buildGradleFound, err := pathutil.IsPathExists(filepath.Join(location, "build.gradle"))
 	if err != nil {
 		return Project{}, err
@@ -27,6 +34,10 @@ func NewProject(location string) (Project, error) {
 
 	if !buildGradleFound {
 		return Project{}, fmt.Errorf("no build.gradle file found in (%s)", location)
+	}
+
+	if location == "/" {
+		return Project{location: location, monoRepo: false}, nil
 	}
 
 	root := filepath.Join(location, "..")
@@ -39,11 +50,9 @@ func NewProject(location string) (Project, error) {
 	projectsCount := 0
 	for _, file := range files {
 		if file.IsDir() {
-			e, err := pathutil.IsPathExists(filepath.Join(root, file.Name(), "build.gradle"))
-			if err != nil {
+			if exists, err := pathutil.IsPathExists(filepath.Join(root, file.Name(), "build.gradle")); err != nil {
 				return Project{}, err
-			}
-			if e {
+			} else if exists {
 				projectsCount++
 			}
 		}
@@ -52,8 +61,8 @@ func NewProject(location string) (Project, error) {
 	return Project{location: location, monoRepo: (projectsCount >= 2)}, nil
 }
 
-// SetModule ...
-func (proj Project) SetModule(module string) Module {
+// GetModule ...
+func (proj Project) GetModule(module string) Module {
 	return Module{
 		project: proj,
 		name:    getGradleModule(module),
@@ -62,23 +71,43 @@ func (proj Project) SetModule(module string) Module {
 
 // FindArtifacts ...
 func (proj Project) FindArtifacts(generatedAfter time.Time, pattern string) ([]Artifact, error) {
-	paths := []Artifact{}
-	return paths, filepath.Walk(proj.location, func(path string, info os.FileInfo, err error) error {
+	var a []Artifact
+	return a, filepath.Walk(proj.location, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			log.Warnf("failed to walk path: %s", err)
 			return nil
 		}
 
-		if info.ModTime().Before(generatedAfter) || !glob.Glob(pattern, path) || info.IsDir() {
+		if info.ModTime().Before(generatedAfter) || info.IsDir() || !glob.Glob(pattern, path) {
 			return nil
 		}
 
-		name, err := extractArtifactName(proj, path)
+		name, err := proj.extractArtifactName(path)
 		if err != nil {
 			return err
 		}
 
-		paths = append(paths, Artifact{Name: name, Path: path})
+		a = append(a, Artifact{Name: name, Path: path})
 		return nil
 	})
+}
+
+func (proj Project) extractArtifactName(path string) (string, error) {
+	relPath, err := filepath.Rel(proj.location, path)
+	if err != nil {
+		return "", err
+	}
+
+	module := strings.Split(relPath, "/")[0]
+	fileName := filepath.Base(relPath)
+
+	if proj.monoRepo {
+		splitPath := strings.Split(proj.location, "/")
+		prefix := splitPath[len(splitPath)-1]
+		if prefix != "" {
+			module = prefix + "-" + module
+		}
+	}
+
+	return module + "-" + fileName, nil
 }

@@ -1,15 +1,44 @@
-format_version: 4
+format_version: 5
 default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
 
 app:
   envs:
   - BITRISE_STEP_ID: android-lint
   - BITRISE_STEP_VERSION: "0.9.0"
-  - BITRISE_STEP_GIT_CLONE_URL: https://github.com/bitrise-steplib/bitrise-step-android-lint
+  - BITRISE_STEP_GIT_CLONE_URL: https://github.com/bitrise-steplib/bitrise-step-android-lint.git
   - MY_STEPLIB_REPO_FORK_GIT_URL: $MY_STEPLIB_REPO_FORK_GIT_URL
 
 workflows:
+  quicktest:
+    steps:
+    - script:
+        inputs:
+        - content: |
+            #!/bin/bash
+            rm -rf _tmp
+    - change-workdir:
+        title: Switch working dir to test / _tmp dir
+        description: |-
+          To prevent step testing issues, like referencing relative
+          files with just './some-file' in the step's code, which would
+          work for testing the step from this directory directly
+          but would break if the step is included in another `bitrise.yml`.
+        run_if: true
+        inputs:
+        - path: ./_tmp
+        - is_create_path: true
+    - script:
+        inputs:
+        - content: |
+            #!/bin/bash
+            git clone https://github.com/bitrise-samples/android-multiple-test-results-sample.git .
+    - path::./:
+        inputs:
+        - project_location: "."
+
   test:
+    before_run:
+    - go-tests
     after_run: 
     - test-in-tmp
     steps:
@@ -35,10 +64,6 @@ workflows:
             #!/bin/bash
             git clone https://github.com/bitrise-samples/android-multiple-test-results-sample.git .
     - path::./:
-        is_always_run: true
-        inputs:
-        - module:
-        - variant:
     - change-workdir:
         title: Switch working dir to test / _tmp dir
         description: |-
@@ -67,10 +92,6 @@ workflows:
         - path: ./ui/espresso/IdlingResourceSample
         - is_create_path: true
     - path::./:
-        is_always_run: true
-        inputs:
-        - module:
-        - variant:
 
   test-in-tmp:
     steps:
@@ -96,10 +117,6 @@ workflows:
             #!/bin/bash
             git clone https://github.com/bitrise-samples/android-multiple-test-results-sample.git .
     - path::./:
-        is_always_run: true
-        inputs:
-        - module:
-        - variant:
     - change-workdir:
         title: Switch working dir to test / _tmp dir
         description: |-
@@ -144,10 +161,59 @@ workflows:
         - path: ./ui/espresso/IdlingResourceSample
         - is_create_path: true
     - path::./:
-        is_always_run: true
+
+  go-tests:
+    before_run:
+    - _install-test-tools
+    steps:
+    - script:
+        title: Export go files to test
         inputs:
-        - module:
-        - variant:
+        - content: |-
+            #!/bin/bash
+            set -ex
+            no_vendor_paths="$(go list ./... | grep -v vendor)"
+            envman add --key GOLIST_WITHOUT_VENDOR --value "$no_vendor_paths"
+    - script:
+        title: Err check
+        inputs:
+        - content: |-
+            #!/bin/bash
+            set -ex
+            errcheck -asserts=true -blank=true $GOLIST_WITHOUT_VENDOR
+    - script:
+        title: Go lint
+        inputs:
+        - content: |-
+            #!/bin/bash
+            set -ex
+            while read -r line; do
+              echo "-> Linting: $line"
+              golint_out="$(golint $line)"
+              if [[ "${golint_out}" != "" ]] ; then
+                echo "=> Golint issues found:"
+                echo "${golint_out}"
+                exit 1
+              fi
+            done <<< "$GOLIST_WITHOUT_VENDOR"
+    - script:
+        title: Go test
+        inputs:
+        - content: |-
+            #!/bin/bash
+            set -ex
+            go test ./...
+
+  _install-test-tools:
+    steps:
+    - script:
+        title: Install required testing tools
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+            set -ex
+            go get -u -v github.com/kisielk/errcheck
+            go get -u -v github.com/golang/lint/golint
 
   # ----------------------------------------------------------------
   # --- workflows to Share this step into a Step Library

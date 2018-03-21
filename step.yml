@@ -1,9 +1,6 @@
-title: |-
-  Android Lint
-summary: |
-  Runs lint gradle task on your project.
-description: |
-  Runs lint gradle task on your project.
+title: Android Lint
+summary: Runs lint gradle task on your project.
+description: Runs lint gradle task on your project.
 website: https://github.com/bitrise-steplib/bitrise-step-android-lint
 source_code_url: https://github.com/bitrise-steplib/bitrise-step-android-lint
 support_url: https://github.com/bitrise-steplib/bitrise-step-android-lint/issues

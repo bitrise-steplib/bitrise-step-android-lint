@@ -1,7 +1,6 @@
 package gradle
 
 import (
-	"reflect"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -41,7 +40,7 @@ func TestTaskParseVariants(t *testing.T) {
 		"InvX86StageRelease",
 	}
 
-	require.Equal(t, true, reflect.DeepEqual(expected, parsedVariants))
+	require.Equal(t, expected, parsedVariants)
 }
 
 const sampleGradleOutput = `

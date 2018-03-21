@@ -16,7 +16,7 @@ import (
 
 // Config ...
 type Config struct {
-	ProjectLocation   string `env:"project_location,dir"`
+	ProjectLocation   string `env:"project_location,required"`
 	ReportPathPattern string `env:"report_path_pattern"`
 	Variant           string `env:"variant"`
 	Module            string `env:"module"`
@@ -47,8 +47,8 @@ func main() {
 	}
 
 	lintTask := gradleProject.
-		SetModule(config.Module).
-		SetTask("lint")
+		GetModule(config.Module).
+		GetTask("lint")
 
 	log.Infof("Variants:")
 	fmt.Println()
@@ -86,7 +86,7 @@ func main() {
 	started := time.Now()
 
 	log.Infof("Run lint:")
-	if err := lintTask.RunVariants(filteredVariants); err != nil {
+	if err := lintTask.Run(filteredVariants); err != nil {
 		failf("Lint task failed, error: %v", err)
 	}
 	fmt.Println()
@@ -100,27 +100,20 @@ func main() {
 	}
 
 	for _, artifact := range artifacts {
-		exists, err := pathutil.IsPathExists(
-			filepath.Join(deployDir, artifact.Name),
-		)
-		if err != nil {
+		if exists, err := pathutil.IsPathExists(filepath.Join(deployDir, artifact.Name)); err != nil {
 			failf("failed to check path, error: %v", err)
-		}
-
-		artifactName := filepath.Base(artifact.Path)
-
-		if exists {
-			timestamp := time.Now().
-				Format("20060102150405")
+		} else if exists {
+			artifactName := filepath.Base(artifact.Path)
+			timestamp := time.Now().Format("20060102150405")
 			ext := filepath.Ext(artifact.Name)
 			name := strings.TrimSuffix(filepath.Base(artifact.Name), ext)
 			artifact.Name = fmt.Sprintf("%s-%s%s", name, timestamp, ext)
-		}
 
-		log.Printf("  Export [ %s => $BITRISE_DEPLOY_DIR/%s ]", artifactName, artifact.Name)
+			log.Printf("  Export [ %s => $BITRISE_DEPLOY_DIR/%s ]", artifactName, artifact.Name)
 
-		if err := artifact.Export(deployDir); err != nil {
-			log.Warnf("failed to export artifacts, error: %v", err)
+			if err := artifact.Export(deployDir); err != nil {
+				log.Warnf("failed to export artifacts, error: %v", err)
+			}
 		}
 	}
 }

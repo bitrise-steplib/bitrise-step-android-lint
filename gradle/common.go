@@ -8,7 +8,7 @@ import (
 	"github.com/bitrise-io/go-utils/command"
 )
 
-// If we parse tasks that starting with lint, we will have tasks that starts
+// If we parse tasks that starts with lint, we will have tasks that starts
 // with lintVital also. So list here each conflicting tasks. (only overlapping ones)
 var conflicts = map[string][]string{
 	"lint": []string{
@@ -29,8 +29,7 @@ func runGradleCommand(projPath string, tasks ...string) error {
 		Run()
 }
 
-func cleanStringSlice(in []string) []string {
-	out := []string{}
+func cleanStringSlice(in []string) (out []string) {
 	for _, s := range in {
 		s = strings.TrimSpace(s)
 		if s == "" {
@@ -38,5 +37,5 @@ func cleanStringSlice(in []string) []string {
 		}
 		out = append(out, s)
 	}
-	return out
+	return
 }

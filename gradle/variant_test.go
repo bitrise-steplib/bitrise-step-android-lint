@@ -1,7 +1,6 @@
 package gradle
 
 import (
-	"reflect"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -83,7 +82,7 @@ func TestVariantsFilter(t *testing.T) {
 			},
 		},
 	} {
-		require.Equal(t, true, reflect.DeepEqual(data.inputVariants.Filter(data.filter), data.want), name)
+		require.Equal(t, data.inputVariants.Filter(data.filter), data.want, name)
 	}
 }
 

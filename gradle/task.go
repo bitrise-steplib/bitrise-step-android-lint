@@ -17,12 +17,11 @@ func (task *Task) GetVariants() (Variants, error) {
 	if err != nil {
 		return nil, fmt.Errorf("%s, %s", tasksOutput, err)
 	}
-
-	return cleanStringSlice(task.parseVariants(tasksOutput)), nil
+	return task.parseVariants(tasksOutput), nil
 }
 
 func (task *Task) parseVariants(gradleOutput string) Variants {
-	tasks := []string{}
+	var tasks []string
 lines:
 	for _, l := range strings.Split(gradleOutput, "\n") {
 		l = strings.TrimSpace(l)
@@ -43,12 +42,12 @@ lines:
 			tasks = append(tasks, l)
 		}
 	}
-	return tasks
+	return cleanStringSlice(tasks)
 }
 
-// RunVariants ...
-func (task *Task) RunVariants(variants Variants) error {
-	args := []string{}
+// Run ...
+func (task *Task) Run(variants Variants) error {
+	var args []string
 	for _, variant := range variants {
 		args = append(args, task.module.name+task.name+variant)
 	}

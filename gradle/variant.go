@@ -20,11 +20,9 @@ func (variants Variants) Filter(filter string) Variants {
 	cleanedVariants := []string{}
 	for _, variant := range variants {
 		for _, filter := range cleanedFilters {
-			filter = strings.ToLower(filter)
-			if strings.Contains(strings.ToLower(variant), filter) {
-				if !sliceutil.IsStringInSlice(variant, cleanedVariants) {
-					cleanedVariants = append(cleanedVariants, variant)
-				}
+			if strings.Contains(strings.ToLower(variant), strings.ToLower(filter)) &&
+				!sliceutil.IsStringInSlice(variant, cleanedVariants) {
+				cleanedVariants = append(cleanedVariants, variant)
 			}
 		}
 	}
