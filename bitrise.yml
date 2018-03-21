@@ -187,6 +187,7 @@ workflows:
             set -ex
             go get -u -v github.com/kisielk/errcheck
             go get -u -v github.com/golang/lint/golint
+            go get -u -v github.com/stretchr/testify/require
 
   # ----------------------------------------------------------------
   # --- workflows to Share this step into a Step Library
