@@ -129,6 +129,7 @@ workflows:
             #!/bin/bash
             set -ex
             go get -u -v github.com/kisielk/errcheck
+            go get -u -v github.com/stretchr/testify/require
             errcheck -asserts=true -blank=true $GOLIST_WITHOUT_VENDOR
     - script:
         title: Go lint
@@ -152,7 +153,6 @@ workflows:
         - content: |-
             #!/bin/bash
             set -ex
-            go get -u -v github.com/stretchr/testify/require
             go test ./...
 
   # ----------------------------------------------------------------
