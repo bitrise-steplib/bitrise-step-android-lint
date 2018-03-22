@@ -86,8 +86,9 @@ func main() {
 	started := time.Now()
 
 	log.Infof("Run lint:")
-	if err := lintTask.Run(filteredVariants); err != nil {
-		failf("Lint task failed, error: %v", err)
+	taskError := lintTask.Run(filteredVariants)
+	if taskError != nil {
+		log.Errorf("Lint task failed, error: %v", err)
 	}
 	fmt.Println()
 
@@ -99,28 +100,38 @@ func main() {
 		failf("failed to find artifacts, error: %v", err)
 	}
 
-	for _, artifact := range artifacts {
-		exists, err := pathutil.IsPathExists(
-			filepath.Join(deployDir, artifact.Name),
-		)
-		if err != nil {
-			failf("failed to check path, error: %v", err)
+	if len(artifacts) > 0 {
+		for _, artifact := range artifacts {
+			exists, err := pathutil.IsPathExists(
+				filepath.Join(deployDir, artifact.Name),
+			)
+			if err != nil {
+				failf("failed to check path, error: %v", err)
+			}
+
+			artifactName := filepath.Base(artifact.Path)
+
+			if exists {
+				timestamp := time.Now().
+					Format("20060102150405")
+				ext := filepath.Ext(artifact.Name)
+				name := strings.TrimSuffix(filepath.Base(artifact.Name), ext)
+				artifact.Name = fmt.Sprintf("%s-%s%s", name, timestamp, ext)
+			}
+
+			log.Printf("  Export [ %s => $BITRISE_DEPLOY_DIR/%s ]", artifactName, artifact.Name)
+
+			if err := artifact.Export(deployDir); err != nil {
+				log.Warnf("failed to export artifacts, error: %v", err)
+			}
 		}
+	} else {
+		log.Warnf("No artifacts found with pattern: %s", config.ReportPathPattern)
+		log.Warnf("If you have changed default report file paths with lintOptions/htmlOutput or lintOptions/xmlOutput")
+		log.Warnf("in your gradle files then you might need to change ReportPathPattern accordingly.")
+	}
 
-		artifactName := filepath.Base(artifact.Path)
-
-		if exists {
-			timestamp := time.Now().
-				Format("20060102150405")
-			ext := filepath.Ext(artifact.Name)
-			name := strings.TrimSuffix(filepath.Base(artifact.Name), ext)
-			artifact.Name = fmt.Sprintf("%s-%s%s", name, timestamp, ext)
-		}
-
-		log.Printf("  Export [ %s => $BITRISE_DEPLOY_DIR/%s ]", artifactName, artifact.Name)
-
-		if err := artifact.Export(deployDir); err != nil {
-			log.Warnf("failed to export artifacts, error: %v", err)
-		}
+	if taskError != nil {
+		os.Exit(1)
 	}
 }
