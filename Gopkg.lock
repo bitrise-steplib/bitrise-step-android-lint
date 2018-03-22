@@ -24,6 +24,12 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/bitrise-tools/go-android"
+  packages = ["gradle"]
+  revision = "fdc8166351b80c954b2c3858bcc6cdd8d66f84f5"
+
+[[projects]]
+  branch = "master"
   name = "github.com/bitrise-tools/go-steputils"
   packages = ["stepconf"]
   revision = "b0e1079aa921440413a5c56f301246fe8367c072"
@@ -37,6 +43,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "4588a0f2bb93e25bbd3d0e0381fd330db2b2b913e6af9cd2b4c73ddcf6a814ad"
+  inputs-digest = "fc4174b26718a8b7fd44810c25d2cdaac07f77305cb8abb9515d8c99c06f8d72"
   solver-name = "gps-cdcl"
   solver-version = 1

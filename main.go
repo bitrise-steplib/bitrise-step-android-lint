@@ -10,7 +10,7 @@ import (
 	"github.com/bitrise-io/depman/pathutil"
 	"github.com/bitrise-io/go-utils/log"
 	"github.com/bitrise-io/go-utils/sliceutil"
-	"github.com/bitrise-steplib/bitrise-step-android-lint/gradle"
+	"github.com/bitrise-tools/go-android/gradle"
 	"github.com/bitrise-tools/go-steputils/stepconf"
 )
 
