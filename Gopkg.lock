@@ -3,12 +3,6 @@
 
 [[projects]]
   branch = "master"
-  name = "github.com/bitrise-io/depman"
-  packages = ["pathutil"]
-  revision = "e296641465fca7487059fcabd9bb57e9a3f3b1f8"
-
-[[projects]]
-  branch = "master"
   name = "github.com/bitrise-io/go-utils"
   packages = [
     "colorstring",
@@ -43,6 +37,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "fc4174b26718a8b7fd44810c25d2cdaac07f77305cb8abb9515d8c99c06f8d72"
+  inputs-digest = "0bf6ee014103ddba75ac2819e4fbfb2dbaa48e1b9fa05cdd643d11cdd34901e6"
   solver-name = "gps-cdcl"
   solver-version = 1
