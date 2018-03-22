@@ -7,47 +7,55 @@ import (
 )
 
 func TestExtractArtifactName(t *testing.T) {
-	proj := Project{
-		location: "/root_dir",
-		monoRepo: false,
+	t.Log("simple repo")
+	{
+		proj := Project{
+			location: "/root_dir",
+			monoRepo: false,
+		}
+		got, err := proj.extractArtifactName(
+			"/root_dir/mymodule/build/reports/myartifact.html")
+
+		require.NoError(t, err)
+		require.Equal(t, "mymodule-myartifact.html", got)
 	}
-	// non-monorepo
-	got, err := proj.extractArtifactName(
-		"/root_dir/mymodule/build/reports/myartifact.html")
 
-	require.NoError(t, err)
-	require.Equal(t, "mymodule-myartifact.html", got)
+	t.Log("mono repo")
+	{
+		proj := Project{
+			location: "/root_dir",
+			monoRepo: true,
+		}
+		got, err := proj.extractArtifactName(
+			"/root_dir/mymodule/build/reports/myartifact.html")
 
-	// monorepo
-	proj = Project{
-		location: "/root_dir",
-		monoRepo: true,
+		require.NoError(t, err)
+		require.Equal(t, "root_dir-mymodule-myartifact.html", got)
 	}
-	got, err = proj.extractArtifactName(
-		"/root_dir/mymodule/build/reports/myartifact.html")
 
-	require.NoError(t, err)
-	require.Equal(t, "root_dir-mymodule-myartifact.html", got)
+	t.Log("simple repo in root")
+	{
+		proj := Project{
+			location: "/",
+			monoRepo: false,
+		}
+		got, err := proj.extractArtifactName(
+			"/mymodule/build/reports/myartifact.html")
 
-	// in root
-	proj = Project{
-		location: "/",
-		monoRepo: false,
+		require.NoError(t, err)
+		require.Equal(t, "mymodule-myartifact.html", got)
 	}
-	got, err = proj.extractArtifactName(
-		"/mymodule/build/reports/myartifact.html")
 
-	require.NoError(t, err)
-	require.Equal(t, "mymodule-myartifact.html", got)
+	t.Log("mono repo in root")
+	{
+		proj := Project{
+			location: "/",
+			monoRepo: true,
+		}
+		got, err := proj.extractArtifactName(
+			"/mymodule/build/reports/myartifact.html")
 
-	// in root monorepo
-	proj = Project{
-		location: "/",
-		monoRepo: true,
+		require.NoError(t, err)
+		require.Equal(t, "mymodule-myartifact.html", got)
 	}
-	got, err = proj.extractArtifactName(
-		"/mymodule/build/reports/myartifact.html")
-
-	require.NoError(t, err)
-	require.Equal(t, "mymodule-myartifact.html", got)
 }

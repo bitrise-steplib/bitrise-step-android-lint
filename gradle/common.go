@@ -1,7 +1,6 @@
 package gradle
 
 import (
-	"os"
 	"path/filepath"
 	"strings"
 
@@ -22,10 +21,8 @@ func getGradleOutput(projPath string, tasks ...string) (string, error) {
 }
 
 func runGradleCommand(projPath string, tasks ...string) error {
-	return command.New(filepath.Join(projPath, "gradlew"), tasks...).
+	return command.NewWithStandardOuts(filepath.Join(projPath, "gradlew"), tasks...).
 		SetDir(projPath).
-		SetStdout(os.Stdout).
-		SetStderr(os.Stderr).
 		Run()
 }
 

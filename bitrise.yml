@@ -7,13 +7,19 @@ app:
   - BITRISE_STEP_VERSION: "0.9.0"
   - BITRISE_STEP_GIT_CLONE_URL: https://github.com/bitrise-steplib/bitrise-step-android-lint.git
   - MY_STEPLIB_REPO_FORK_GIT_URL: $MY_STEPLIB_REPO_FORK_GIT_URL
+  - SIMPLE_REPO_GIT_CLONE_URL: https://github.com/bitrise-samples/android-multiple-test-results-sample.git
+  - MONO_REPO_GIT_CLONE_URL: https://github.com/bitrise-samples/android-testing.git
 
 workflows:
   test:
+    title: Test simple android project & mono repo projects
     before_run:
     - go-tests
-    after_run: 
-    - test-in-tmp
+    after_run:
+    - simple-and-mono-repo-in-src-dir
+    - simple-and-mono-repo-in-root-tmp-dir
+  simple-and-mono-repo-in-src-dir:
+    title: Test simple android project & mono repo projects in source dir
     steps:
     - script:
         inputs:
@@ -21,12 +27,7 @@ workflows:
             #!/bin/bash
             rm -rf _tmp
     - change-workdir:
-        title: Switch working dir to test / _tmp dir
-        description: |-
-          To prevent step testing issues, like referencing relative
-          files with just './some-file' in the step's code, which would
-          work for testing the step from this directory directly
-          but would break if the step is included in another `bitrise.yml`.
+        title: cd $BITRISE_SOURCE_DIR/_tmp
         run_if: true
         inputs:
         - path: ./_tmp
@@ -35,15 +36,11 @@ workflows:
         inputs:
         - content: |
             #!/bin/bash
-            git clone https://github.com/bitrise-samples/android-multiple-test-results-sample.git .
+            git clone $SIMPLE_REPO_GIT_CLONE_URL .
     - path::./:
+        title: Test simple android project
     - change-workdir:
-        title: Switch working dir to test / _tmp dir
-        description: |-
-          To prevent step testing issues, like referencing relative
-          files with just './some-file' in the step's code, which would
-          work for testing the step from this directory directly
-          but would break if the step is included in another `bitrise.yml`.
+        title: cd $BITRISE_SOURCE_DIR/_tmp/_tmp
         run_if: true
         inputs:
         - path: ./_tmp
@@ -52,21 +49,18 @@ workflows:
         inputs:
         - content: |
             #!/bin/bash
-            git clone https://github.com/bitrise-samples/android-testing.git .
+            git clone $MONO_REPO_GIT_CLONE_URL .
     - change-workdir:
-        title: Switch working dir to test / _tmp dir
-        description: |-
-          To prevent step testing issues, like referencing relative
-          files with just './some-file' in the step's code, which would
-          work for testing the step from this directory directly
-          but would break if the step is included in another `bitrise.yml`.
+        title: cd $BITRISE_SOURCE_DIR/_tmp/_tmp/ui/espresso/IdlingResourceSample
         run_if: true
         inputs:
         - path: ./ui/espresso/IdlingResourceSample
         - is_create_path: true
     - path::./:
+        title: Test monorepo
 
-  test-in-tmp:
+  simple-and-mono-repo-in-root-tmp-dir:
+    title: Test simple android project & mono repo projects in /tmp dir
     steps:
     - script:
         inputs:
@@ -74,12 +68,7 @@ workflows:
             #!/bin/bash
             rm -rf /tmp/_tmp
     - change-workdir:
-        title: Switch working dir to test / _tmp dir
-        description: |-
-          To prevent step testing issues, like referencing relative
-          files with just './some-file' in the step's code, which would
-          work for testing the step from this directory directly
-          but would break if the step is included in another `bitrise.yml`.
+        title: cd /tmp/_tmp
         run_if: true
         inputs:
         - path: /tmp/_tmp
@@ -88,15 +77,11 @@ workflows:
         inputs:
         - content: |
             #!/bin/bash
-            git clone https://github.com/bitrise-samples/android-multiple-test-results-sample.git .
+            git clone $SIMPLE_REPO_GIT_CLONE_URL .
     - path::./:
+        title: Test simple repo
     - change-workdir:
-        title: Switch working dir to test / _tmp dir
-        description: |-
-          To prevent step testing issues, like referencing relative
-          files with just './some-file' in the step's code, which would
-          work for testing the step from this directory directly
-          but would break if the step is included in another `bitrise.yml`.
+        title: cd /tmp
         run_if: true
         inputs:
         - path: /tmp
@@ -107,12 +92,7 @@ workflows:
             #!/bin/bash
             rm -rf /tmp/_tmp
     - change-workdir:
-        title: Switch working dir to test / _tmp dir
-        description: |-
-          To prevent step testing issues, like referencing relative
-          files with just './some-file' in the step's code, which would
-          work for testing the step from this directory directly
-          but would break if the step is included in another `bitrise.yml`.
+        title: cd /tmp/_tmp
         run_if: true
         inputs:
         - path: /tmp/_tmp
@@ -121,23 +101,17 @@ workflows:
         inputs:
         - content: |
             #!/bin/bash
-            git clone https://github.com/bitrise-samples/android-testing.git .
+            git clone $MONO_REPO_GIT_CLONE_URL .
     - change-workdir:
-        title: Switch working dir to test / _tmp dir
-        description: |-
-          To prevent step testing issues, like referencing relative
-          files with just './some-file' in the step's code, which would
-          work for testing the step from this directory directly
-          but would break if the step is included in another `bitrise.yml`.
+        title: cd /tmp/ui/espresso/IdlingResourceSample
         run_if: true
         inputs:
         - path: ./ui/espresso/IdlingResourceSample
         - is_create_path: true
     - path::./:
+        title: Test monorepo
 
   go-tests:
-    before_run:
-    - _install-test-tools
     steps:
     - script:
         title: Export go files to test
@@ -145,6 +119,7 @@ workflows:
         - content: |-
             #!/bin/bash
             set -ex
+
             no_vendor_paths="$(go list ./... | grep -v vendor)"
             envman add --key GOLIST_WITHOUT_VENDOR --value "$no_vendor_paths"
     - script:
@@ -153,6 +128,7 @@ workflows:
         - content: |-
             #!/bin/bash
             set -ex
+            go get -u -v github.com/kisielk/errcheck
             errcheck -asserts=true -blank=true $GOLIST_WITHOUT_VENDOR
     - script:
         title: Go lint
@@ -160,6 +136,7 @@ workflows:
         - content: |-
             #!/bin/bash
             set -ex
+            go get -u -v github.com/golang/lint/golint
             while read -r line; do
               echo "-> Linting: $line"
               golint_out="$(golint $line)"
@@ -175,19 +152,8 @@ workflows:
         - content: |-
             #!/bin/bash
             set -ex
-            go test ./...
-
-  _install-test-tools:
-    steps:
-    - script:
-        title: Install required testing tools
-        inputs:
-        - content: |-
-            #!/usr/bin/env bash
-            set -ex
-            go get -u -v github.com/kisielk/errcheck
-            go get -u -v github.com/golang/lint/golint
             go get -u -v github.com/stretchr/testify/require
+            go test ./...
 
   # ----------------------------------------------------------------
   # --- workflows to Share this step into a Step Library

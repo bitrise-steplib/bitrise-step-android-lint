@@ -1,7 +1,5 @@
 package gradle
 
-import "fmt"
-
 // Module ...
 type Module struct {
 	project Project
@@ -15,11 +13,4 @@ func (module Module) GetTask(name string) *Task {
 		module: module,
 		name:   name,
 	}
-}
-
-func getGradleModule(configModule string) string {
-	if configModule != "" {
-		return fmt.Sprintf(":%s:", configModule)
-	}
-	return ""
 }

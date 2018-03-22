@@ -44,12 +44,6 @@ func TestTaskParseVariants(t *testing.T) {
 }
 
 const sampleGradleOutput = `
-> Task :tasks
-
-------------------------------------------------------------
-All tasks runnable from root project
-------------------------------------------------------------
-
 Android tasks
 -------------
 androidDependencies - Displays the Android dependencies of the project.
@@ -277,11 +271,4 @@ testInvX86LocalReleaseUnitTest - Run unit tests for the invX86LocalRelease build
 testInvX86ProdDebugUnitTest - Run unit tests for the invX86ProdDebug build.
 testInvX86ProdReleaseUnitTest - Run unit tests for the invX86ProdRelease build.
 testInvX86StageDebugUnitTest - Run unit tests for the invX86StageDebug build.
-testInvX86StageReleaseUnitTest - Run unit tests for the invX86StageRelease build.
-
-To see all tasks and more detail, run gradlew tasks --all
-
-To see more detail about a task, run gradlew help --task <task>
-
-BUILD SUCCESSFUL in 0s
-1 actionable task: 1 executed`
+testInvX86StageReleaseUnitTest - Run unit tests for the invX86StageRelease build.`

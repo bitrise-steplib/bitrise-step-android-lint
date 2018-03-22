@@ -17,7 +17,7 @@ func (variants Variants) Filter(filter string) Variants {
 		return variants
 	}
 
-	cleanedVariants := []string{}
+	var cleanedVariants []string
 	for _, variant := range variants {
 		for _, filter := range cleanedFilters {
 			if strings.Contains(strings.ToLower(variant), strings.ToLower(filter)) &&

@@ -58,7 +58,14 @@ func NewProject(location string) (Project, error) {
 		}
 	}
 
-	return Project{location: location, monoRepo: (projectsCount >= 2)}, nil
+	return Project{location: location, monoRepo: (projectsCount > 1)}, nil
+}
+
+func getGradleModule(configModule string) string {
+	if configModule != "" {
+		return fmt.Sprintf(":%s:", configModule)
+	}
+	return ""
 }
 
 // GetModule ...
