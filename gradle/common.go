@@ -29,10 +29,9 @@ func runGradleCommand(projPath string, tasks ...string) error {
 func cleanStringSlice(in []string) (out []string) {
 	for _, s := range in {
 		s = strings.TrimSpace(s)
-		if s == "" {
-			continue
+		if s != "" {
+			out = append(out, s)
 		}
-		out = append(out, s)
 	}
 	return
 }
