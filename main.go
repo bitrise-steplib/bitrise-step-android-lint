@@ -32,21 +32,19 @@ func failf(f string, args ...interface{}) {
 }
 
 func getArtifacts(gradleProject gradle.Project, started time.Time, pattern string) (artifacts []gradle.Artifact, err error) {
-	for _, t := range []time.Time{started, time.Time{}} {
-		artifacts, err = gradleProject.FindArtifacts(t, pattern, true)
-		if err != nil {
-			return
+	artifacts, err = gradleProject.FindArtifacts(started, pattern, true)
+	if err != nil {
+		return
+	}
+	if len(artifacts) == 0 {
+		if !started.IsZero() {
+			log.Warnf("No artifacts found with pattern: %s that has modification time after: %s", pattern, started)
+			log.Warnf("Retrying without modtime check....")
+			fmt.Println()
+			return getArtifacts(gradleProject, time.Time{}, pattern)
 		}
-		if len(artifacts) == 0 {
-			if t == started {
-				log.Warnf("No artifacts found with pattern: %s that has modification time after: %s", pattern, t)
-				log.Warnf("Retrying without modtime check....")
-				fmt.Println()
-				continue
-			}
-			log.Warnf("No artifacts found with pattern: %s without modtime check", pattern)
-			log.Warnf("If you have changed default report export path in your gradle files then you might need to change ReportPathPattern accordingly.")
-		}
+		log.Warnf("No artifacts found with pattern: %s without modtime check", pattern)
+		log.Warnf("If you have changed default report export path in your gradle files then you might need to change ReportPathPattern accordingly.")
 	}
 	return
 }
@@ -88,9 +86,9 @@ func main() {
 		for _, variant := range variants {
 			if sliceutil.IsStringInSlice(variant, filteredVariants[module]) {
 				log.Donef("✓ %s", strings.TrimSuffix(variant, "UnitTest"))
-			} else {
-				log.Printf("- %s", strings.TrimSuffix(variant, "UnitTest"))
+				continue
 			}
+			log.Printf("- %s", strings.TrimSuffix(variant, "UnitTest"))
 		}
 	}
 	fmt.Println()
@@ -99,9 +97,8 @@ func main() {
 		if config.Variant != "" {
 			if config.Module == "" {
 				failf("Variant (%s) not found in any module", config.Variant)
-			} else {
-				failf("No variant matching for (%s) in module: [%s]", config.Variant, config.Module)
 			}
+			failf("No variant matching for (%s) in module: [%s]", config.Variant, config.Module)
 		}
 		failf("Module not found: %s", config.Module)
 	}
