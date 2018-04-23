@@ -10,21 +10,45 @@ import (
 	"github.com/bitrise-io/go-utils/log"
 	"github.com/bitrise-io/go-utils/pathutil"
 	"github.com/bitrise-io/go-utils/sliceutil"
+	"github.com/bitrise-steplib/bitrise-step-android-unit-test/cache"
 	"github.com/bitrise-tools/go-android/gradle"
 	"github.com/bitrise-tools/go-steputils/stepconf"
+	shellquote "github.com/kballard/go-shellquote"
 )
 
 // Config ...
 type Config struct {
-	ProjectLocation   string `env:"project_location,required"`
+	ProjectLocation   string `env:"project_location,dir"`
 	ReportPathPattern string `env:"report_path_pattern"`
 	Variant           string `env:"variant"`
 	Module            string `env:"module"`
+	Arguments         string `env:"arguments"`
+	CacheLevel        string `env:"cache_level,opt[none,only_deps,all]"`
 }
 
 func failf(f string, args ...interface{}) {
 	log.Errorf(f, args...)
 	os.Exit(1)
+}
+
+func getArtifacts(gradleProject gradle.Project, started time.Time, pattern string) (artifacts []gradle.Artifact, err error) {
+	for _, t := range []time.Time{started, time.Time{}} {
+		artifacts, err = gradleProject.FindArtifacts(t, pattern, true)
+		if err != nil {
+			return
+		}
+		if len(artifacts) == 0 {
+			if t == started {
+				log.Warnf("No artifacts found with pattern: %s that has modification time after: %s", pattern, t)
+				log.Warnf("Retrying without modtime check....")
+				fmt.Println()
+				continue
+			}
+			log.Warnf("No artifacts found with pattern: %s without modtime check", pattern)
+			log.Warnf("If you have changed default report export path in your gradle files then you might need to change ReportPathPattern accordingly.")
+		}
+	}
+	return
 }
 
 func main() {
@@ -47,7 +71,6 @@ func main() {
 	}
 
 	lintTask := gradleProject.
-		GetModule(config.Module).
 		GetTask("lint")
 
 	log.Infof("Variants:")
@@ -58,35 +81,40 @@ func main() {
 		failf("Failed to fetch variants, error: %s", err)
 	}
 
-	filteredVariants := variants.Filter(config.Variant)
+	filteredVariants := variants.Filter(config.Module, config.Variant)
 
-	for _, variant := range variants {
-		if sliceutil.IsStringInSlice(variant, filteredVariants) {
-			log.Donef("✓ %s", variant)
-		} else {
-			log.Printf("- %s", variant)
+	for module, variants := range variants {
+		log.Printf("%s:", module)
+		for _, variant := range variants {
+			if sliceutil.IsStringInSlice(variant, filteredVariants[module]) {
+				log.Donef("✓ %s", strings.TrimSuffix(variant, "UnitTest"))
+			} else {
+				log.Printf("- %s", strings.TrimSuffix(variant, "UnitTest"))
+			}
 		}
 	}
-
 	fmt.Println()
 
 	if len(filteredVariants) == 0 {
-		errMsg := fmt.Sprintf("No variant matching for: (%s)", config.Variant)
-		if config.Module != "" {
-			errMsg += fmt.Sprintf(" in module: [%s]", config.Module)
+		if config.Variant != "" {
+			if config.Module == "" {
+				failf("Variant (%s) not found in any module", config.Variant)
+			} else {
+				failf("No variant matching for (%s) in module: [%s]", config.Variant, config.Module)
+			}
 		}
-		failf(errMsg)
-	}
-
-	if config.Variant == "" {
-		log.Warnf("No variant specified, lint will run on all variants")
-		fmt.Println()
+		failf("Module not found: %s", config.Module)
 	}
 
 	started := time.Now()
 
+	args, err := shellquote.Split(config.Arguments)
+	if err != nil {
+		failf("Failed to parse arguments, error: %s", err)
+	}
+
 	log.Infof("Run lint:")
-	taskError := lintTask.Run(filteredVariants)
+	taskError := lintTask.Run(filteredVariants, args...)
 	if taskError != nil {
 		log.Errorf("Lint task failed, error: %v", err)
 	}
@@ -95,7 +123,7 @@ func main() {
 	log.Infof("Exporting artifacts:")
 	fmt.Println()
 
-	artifacts, err := gradleProject.FindArtifacts(started, config.ReportPathPattern)
+	artifacts, err := getArtifacts(gradleProject, started, config.ReportPathPattern)
 	if err != nil {
 		failf("failed to find artifacts, error: %v", err)
 	}
@@ -134,4 +162,11 @@ func main() {
 	if taskError != nil {
 		os.Exit(1)
 	}
+
+	fmt.Println()
+	log.Infof("Collecting cache:")
+	if warning := cache.Collect(config.ProjectLocation, cache.Level(config.CacheLevel)); warning != nil {
+		log.Warnf("%s", warning)
+	}
+	log.Donef("  Done")
 }
