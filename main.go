@@ -24,11 +24,7 @@ type Config struct {
 	Module            string `env:"module"`
 	Arguments         string `env:"arguments"`
 	CacheLevel        string `env:"cache_level,opt[none,only_deps,all]"`
-}
-
-func failf(f string, args ...interface{}) {
-	log.Errorf(f, args...)
-	os.Exit(1)
+	DeployDir         string `env:"BITRISE_DEPLOY_DIR,dir"`
 }
 
 func getArtifacts(gradleProject gradle.Project, started time.Time, pattern string) (artifacts []gradle.Artifact, err error) {
@@ -49,23 +45,10 @@ func getArtifacts(gradleProject gradle.Project, started time.Time, pattern strin
 	return
 }
 
-func main() {
-	var config Config
-
-	if err := stepconf.Parse(&config); err != nil {
-		failf("Couldn't create step config: %v\n", err)
-	}
-
-	stepconf.Print(config)
-
-	deployDir := os.Getenv("BITRISE_DEPLOY_DIR")
-
-	log.Printf("- Deploy dir: %s", deployDir)
-	fmt.Println()
-
+func mainE(config Config) error {
 	gradleProject, err := gradle.NewProject(config.ProjectLocation)
 	if err != nil {
-		failf("Failed to open project, error: %s", err)
+		return fmt.Errorf("Failed to open project, error: %s", err)
 	}
 
 	lintTask := gradleProject.
@@ -76,7 +59,7 @@ func main() {
 
 	variants, err := lintTask.GetVariants()
 	if err != nil {
-		failf("Failed to fetch variants, error: %s", err)
+		return fmt.Errorf("Failed to fetch variants, error: %s", err)
 	}
 
 	filteredVariants := variants.Filter(config.Module, config.Variant)
@@ -96,18 +79,18 @@ func main() {
 	if len(filteredVariants) == 0 {
 		if config.Variant != "" {
 			if config.Module == "" {
-				failf("Variant (%s) not found in any module", config.Variant)
+				return fmt.Errorf("Variant (%s) not found in any module", config.Variant)
 			}
-			failf("No variant matching for (%s) in module: [%s]", config.Variant, config.Module)
+			return fmt.Errorf("No variant matching for (%s) in module: [%s]", config.Variant, config.Module)
 		}
-		failf("Module not found: %s", config.Module)
+		return fmt.Errorf("Module not found: %s", config.Module)
 	}
 
 	started := time.Now()
 
 	args, err := shellquote.Split(config.Arguments)
 	if err != nil {
-		failf("Failed to parse arguments, error: %s", err)
+		return fmt.Errorf("Failed to parse arguments, error: %s", err)
 	}
 
 	log.Infof("Run lint:")
@@ -122,16 +105,16 @@ func main() {
 
 	artifacts, err := getArtifacts(gradleProject, started, config.ReportPathPattern)
 	if err != nil {
-		failf("failed to find artifacts, error: %v", err)
+		return fmt.Errorf("failed to find artifacts, error: %v", err)
 	}
 
 	if len(artifacts) > 0 {
 		for _, artifact := range artifacts {
 			exists, err := pathutil.IsPathExists(
-				filepath.Join(deployDir, artifact.Name),
+				filepath.Join(config.DeployDir, artifact.Name),
 			)
 			if err != nil {
-				failf("failed to check path, error: %v", err)
+				return fmt.Errorf("failed to check path, error: %v", err)
 			}
 
 			artifactName := filepath.Base(artifact.Path)
@@ -146,7 +129,7 @@ func main() {
 
 			log.Printf("  Export [ %s => $BITRISE_DEPLOY_DIR/%s ]", artifactName, artifact.Name)
 
-			if err := artifact.Export(deployDir); err != nil {
+			if err := artifact.Export(config.DeployDir); err != nil {
 				log.Warnf("failed to export artifacts, error: %v", err)
 			}
 		}
@@ -156,8 +139,26 @@ func main() {
 		log.Warnf("in your gradle files then you might need to change ReportPathPattern accordingly.")
 	}
 
-	if taskError != nil {
-		os.Exit(1)
+	return taskError
+}
+
+func failf(f string, args ...interface{}) {
+	log.Errorf(f, args...)
+	os.Exit(1)
+}
+
+func main() {
+	var config Config
+
+	if err := stepconf.Parse(&config); err != nil {
+		failf("Couldn't create step config: %v\n", err)
+	}
+
+	stepconf.Print(config)
+	fmt.Println()
+
+	if err := mainE(config); err != nil {
+		failf("%s", err)
 	}
 
 	fmt.Println()
