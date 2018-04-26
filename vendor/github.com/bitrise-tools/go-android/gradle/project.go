@@ -61,23 +61,16 @@ func NewProject(location string) (Project, error) {
 	return Project{location: location, monoRepo: (projectsCount > 1)}, nil
 }
 
-func getGradleModule(configModule string) string {
-	if configModule != "" {
-		return fmt.Sprintf(":%s:", configModule)
-	}
-	return ""
-}
-
-// GetModule ...
-func (proj Project) GetModule(module string) Module {
-	return Module{
+// GetTask ...
+func (proj Project) GetTask(name string) *Task {
+	return &Task{
 		project: proj,
-		name:    getGradleModule(module),
+		name:    name,
 	}
 }
 
 // FindArtifacts ...
-func (proj Project) FindArtifacts(generatedAfter time.Time, pattern string) ([]Artifact, error) {
+func (proj Project) FindArtifacts(generatedAfter time.Time, pattern string, includeModuleInName bool) ([]Artifact, error) {
 	var a []Artifact
 	return a, filepath.Walk(proj.location, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -89,7 +82,7 @@ func (proj Project) FindArtifacts(generatedAfter time.Time, pattern string) ([]A
 			return nil
 		}
 
-		name, err := proj.extractArtifactName(path)
+		name, err := proj.extractArtifactName(path, includeModuleInName)
 		if err != nil {
 			return err
 		}
@@ -99,22 +92,48 @@ func (proj Project) FindArtifacts(generatedAfter time.Time, pattern string) ([]A
 	})
 }
 
-func (proj Project) extractArtifactName(path string) (string, error) {
+// FindDirs ...
+func (proj Project) FindDirs(generatedAfter time.Time, pattern string, includeModuleInName bool) ([]Artifact, error) {
+	var a []Artifact
+	return a, filepath.Walk(proj.location, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			log.Warnf("failed to walk path: %s", err)
+			return nil
+		}
+
+		if info.ModTime().Before(generatedAfter) || !info.IsDir() || !glob.Glob(pattern, path) {
+			return nil
+		}
+
+		name, err := proj.extractArtifactName(path, includeModuleInName)
+		if err != nil {
+			return err
+		}
+
+		a = append(a, Artifact{Name: name, Path: path})
+		return nil
+	})
+}
+
+func (proj Project) extractArtifactName(path string, includeModuleInName bool) (string, error) {
 	relPath, err := filepath.Rel(proj.location, path)
 	if err != nil {
 		return "", err
 	}
 
-	module := strings.Split(relPath, "/")[0]
 	fileName := filepath.Base(relPath)
 
+	if includeModuleInName {
+		fileName = strings.Split(relPath, "/")[0] + "-" + fileName
+	}
+
 	if proj.monoRepo {
-		splitPath := strings.Split(proj.location, "/")
-		prefix := splitPath[len(splitPath)-1]
+		split := strings.Split(proj.location, "/")
+		prefix := split[len(split)-1]
 		if prefix != "" {
-			module = prefix + "-" + module
+			fileName = prefix + "-" + fileName
 		}
 	}
 
-	return module + "-" + fileName, nil
+	return fileName, nil
 }
