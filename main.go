@@ -94,7 +94,13 @@ func mainE(config Config) error {
 	}
 
 	log.Infof("Run lint:")
-	taskError := lintTask.Run(filteredVariants, args...)
+	lintCommand := lintTask.GetCommand(filteredVariants, args...)
+
+	fmt.Println()
+	log.Donef("$ " + lintCommand.PrintableCommandArgs())
+	fmt.Println()
+
+	taskError := lintCommand.Run()
 	if taskError != nil {
 		log.Errorf("Lint task failed, error: %v", taskError)
 	}
