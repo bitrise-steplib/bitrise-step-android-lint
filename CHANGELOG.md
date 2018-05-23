@@ -1,6 +1,11 @@
-## Changelog (Current version: 0.9.1)
+## Changelog (Current version: 0.9.2)
 
 -----------------
+
+### 0.9.2 (2018 May 23)
+* [bd89683] Prepare for 0.9.2
+* [c38064f] dep update and logging the command that was ran (#4)
+* [f634708] Update main.go (#3)
 
 ### 0.9.1 (2018 May 02)
 * [d93b3b0] Prepare for 0.9.1
@@ -9,4 +14,4 @@
 
 -----------------
 
-Updated: 2018 May 02
+Updated: 2018 May 23
