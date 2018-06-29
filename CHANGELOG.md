@@ -1,6 +1,10 @@
-## Changelog (Current version: 0.9.3)
+## Changelog (Current version: 0.9.4)
 
 -----------------
+
+### 0.9.4 (2018 Jun 29)
+* [608292c] Prepare for 0.9.4
+* [3925d4d] dep update (#5)
 
 ### 0.9.3 (2018 Jun 29)
 * [454f238] Prepare for 0.9.3
