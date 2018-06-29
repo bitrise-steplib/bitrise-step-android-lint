@@ -21,14 +21,14 @@
 [[projects]]
   name = "github.com/bitrise-steplib/bitrise-step-android-unit-test"
   packages = ["cache"]
-  revision = "3d89f92d6f4cff8aa2a07de986cfdd7935eb69a8"
-  version = "0.9.2"
+  revision = "f8d54c03abe3e2b09c3ec11d71c8dfa45b6e181c"
+  version = "0.9.3"
 
 [[projects]]
   branch = "master"
   name = "github.com/bitrise-tools/go-android"
   packages = ["gradle"]
-  revision = "d76dcd0cbf2d6643f6b381751a20a153bcbfb55d"
+  revision = "cad5a20e271b6a9667ca2063ec6286f51387b9e4"
 
 [[projects]]
   branch = "master"
