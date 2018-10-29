@@ -37,6 +37,8 @@ workflows:
             #!/bin/bash
             git clone $SIMPLE_REPO_GIT_CLONE_URL .
     - install-missing-android-tools:
+        inputs:
+        - gradlew_path: ./gradlew
     - path::./:
         title: Test simple android project
     - change-workdir:
@@ -84,6 +86,8 @@ workflows:
             #!/bin/bash
             git clone $SIMPLE_REPO_GIT_CLONE_URL .
     - install-missing-android-tools:
+        inputs:
+        - gradlew_path: ./gradlew
     - path::./:
         title: Test simple repo
     - change-workdir:
