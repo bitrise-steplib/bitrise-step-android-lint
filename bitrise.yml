@@ -36,6 +36,7 @@ workflows:
         - content: |
             #!/bin/bash
             git clone $SIMPLE_REPO_GIT_CLONE_URL .
+    - install-missing-android-tools:
     - path::./:
         title: Test simple android project
     - change-workdir:
@@ -82,6 +83,7 @@ workflows:
         - content: |
             #!/bin/bash
             git clone $SIMPLE_REPO_GIT_CLONE_URL .
+    - install-missing-android-tools:
     - path::./:
         title: Test simple repo
     - change-workdir:
