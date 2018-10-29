@@ -57,6 +57,11 @@ workflows:
         - is_create_path: true
     - path::./:
         title: Test monorepo
+    - path::./:
+        title: Test monorepo with module and variant set
+        inputs:
+        - module: app
+        - variant: Debug
 
   simple-and-mono-repo-in-root-tmp-dir:
     title: Test simple android project & mono repo projects in /tmp dir
