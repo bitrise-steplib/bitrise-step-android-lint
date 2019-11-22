@@ -1,6 +1,29 @@
-title: Android Lint
-summary: Runs lint gradle task on your project.
-description: Runs lint gradle task on your project.
+title: "Android Lint"
+summary: |-
+  Runs Lint on your Android build's code and detects potential syntax errors to keep your code error free.
+description: |-
+  It highlights the code line where the error is found, explains the type of error and suggests correction. This Step does not make the build fail if it spots any structural errors in your code. The results are available in a viewable or downloadable Lint Report html file which you can access on the Build's APPS & ARTIFACTS page.
+
+  ### Configuring the Step
+
+  1. Set the **Project Location** input which, by default, points to the root directory of your Android project.
+  2. Set the module and variant you wish to lint in the **Module** and **Variant** fields.
+  Optionally, you can modify these inputs:
+  1. You can set where the lint report should be exported to if you overwrite the **Report location pattern** input. By default, it's set to `*/build/reports/lint-results*.html`.
+  2. You can set if the Step should cache the build cache with dependencies, only the dependencies or nothing at all in the **Set level of cache** input.
+  3. You can set any gradle argument to a gradle task in the **Additional Gradle Arguments** input.
+
+  ### Troubleshooting
+  Make sure you insert the Step before a build Step.
+  Make sure you type the correct module and variant names in the respective fields of the Step. If you are unsure about the exact names, you can check them in the **Project Structure** dialog of your project in Android Studio.
+  
+  ### Useful links
+  [Improve your code with lint checks](https://developer.android.com/studio/write/lint)
+
+  ### Related Steps
+  Android Build
+  Android Unit Test
+  [BETA] Virtual Device Testing for Android
 website: https://github.com/bitrise-steplib/bitrise-step-android-lint
 source_code_url: https://github.com/bitrise-steplib/bitrise-step-android-lint
 support_url: https://github.com/bitrise-steplib/bitrise-step-android-lint/issues
