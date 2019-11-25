@@ -50,8 +50,8 @@ inputs:
   - project_location: $BITRISE_SOURCE_DIR
     opts:
       title: Project Location
-      summary: "The root directory of your android project, e.g.: where your root build gradle file exist (also gradlew, settings.gradle, etc...)"
-      description: "The root directory of your android project, e.g.: where your root build gradle file exist (also gradlew, settings.gradle, etc...)"
+      summary: "The root directory of your android project, for example, where your root build gradle file exists (also gradlew, settings.gradle, etc...)"
+      description: "The root directory of your android project, for example, where your root build gradle file exists (also gradlew, settings.gradle, etc...)"
       is_required: true
   - module: ""
     opts:

@@ -7,12 +7,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/bitrise-io/go-android/cache"
+	"github.com/bitrise-io/go-android/gradle"
+	"github.com/bitrise-io/go-steputils/stepconf"
 	"github.com/bitrise-io/go-utils/log"
 	"github.com/bitrise-io/go-utils/pathutil"
 	"github.com/bitrise-io/go-utils/sliceutil"
-	"github.com/bitrise-steplib/bitrise-step-android-unit-test/cache"
-	"github.com/bitrise-tools/go-android/gradle"
-	"github.com/bitrise-tools/go-steputils/stepconf"
 	shellquote "github.com/kballard/go-shellquote"
 )
 
@@ -45,6 +45,33 @@ func getArtifacts(gradleProject gradle.Project, started time.Time, pattern strin
 	return
 }
 
+func filterVariants(module, variant string, variantsMap gradle.Variants) (gradle.Variants, error) {
+	// if module set: drop all the other modules
+	if module != "" {
+		v, ok := variantsMap[module]
+		if !ok {
+			return nil, fmt.Errorf("module not found: %s", module)
+		}
+		variantsMap = gradle.Variants{module: v}
+	}
+	// if variant not set: use all variants
+	if variant == "" {
+		return variantsMap, nil
+	}
+	filteredVariants := gradle.Variants{}
+	for m, variants := range variantsMap {
+		for _, v := range variants {
+			if strings.ToLower(v) == strings.ToLower(variant) {
+				filteredVariants[m] = append(filteredVariants[m], v)
+			}
+		}
+	}
+	if len(filteredVariants) == 0 {
+		return nil, fmt.Errorf("variant: %s not found in any module", variant)
+	}
+	return filteredVariants, nil
+}
+
 func mainE(config Config) error {
 	gradleProject, err := gradle.NewProject(config.ProjectLocation)
 	if err != nil {
@@ -62,7 +89,10 @@ func mainE(config Config) error {
 		return fmt.Errorf("Failed to fetch variants, error: %s", err)
 	}
 
-	filteredVariants := variants.Filter(config.Module, config.Variant)
+	filteredVariants, err := filterVariants(config.Module, config.Variant, variants)
+	if err != nil {
+		failf("Failed to find buildable variants, error: %s", err)
+	}
 
 	for module, variants := range variants {
 		log.Printf("%s:", module)
@@ -75,16 +105,6 @@ func mainE(config Config) error {
 		}
 	}
 	fmt.Println()
-
-	if len(filteredVariants) == 0 {
-		if config.Variant != "" {
-			if config.Module == "" {
-				return fmt.Errorf("Variant (%s) not found in any module", config.Variant)
-			}
-			return fmt.Errorf("No variant matching for (%s) in module: [%s]", config.Variant, config.Module)
-		}
-		return fmt.Errorf("Module not found: %s", config.Module)
-	}
 
 	started := time.Now()
 
