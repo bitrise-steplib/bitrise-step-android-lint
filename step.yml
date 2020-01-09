@@ -8,6 +8,7 @@ description: |-
 
   1. Set the **Project Location** input which, by default, points to the root directory of your Android project.
   2. Set the module and variant you wish to lint in the **Module** and **Variant** fields.
+  
   Optionally, you can modify these inputs:
   1. You can specify where the Lint reports should be found once the Step has run if you overwrite the **Report location pattern** input.
   2. You can set if the Step should cache build outputs and dependencies, only the dependencies or nothing at all in the **Set level of cache** input.
@@ -18,12 +19,12 @@ description: |-
   Make sure you type the correct module and variant names in the respective fields of the Step. If you are unsure about the exact names, you can check them in the **Project Structure** dialog of your project in Android Studio.
   
   ### Useful links
-  [Improve your code with lint checks](https://developer.android.com/studio/write/lint)
+  - [Improve your code with lint checks](https://developer.android.com/studio/write/lint)
 
   ### Related Steps
-  [Android Build](https://www.bitrise.io/integrations/steps/android-build)
-  [Android Unit Test](https://www.bitrise.io/integrations/steps/android-unit-test)
-  [[BETA] Virtual Device Testing for Android](https://www.bitrise.io/integrations/steps/virtual-device-testing-for-android)
+  - [Android Build](https://www.bitrise.io/integrations/steps/android-build)
+  - [Android Unit Test](https://www.bitrise.io/integrations/steps/android-unit-test)
+  - [[BETA] Virtual Device Testing for Android](https://www.bitrise.io/integrations/steps/virtual-device-testing-for-android)
 website: https://github.com/bitrise-steplib/bitrise-step-android-lint
 source_code_url: https://github.com/bitrise-steplib/bitrise-step-android-lint
 support_url: https://github.com/bitrise-steplib/bitrise-step-android-lint/issues
