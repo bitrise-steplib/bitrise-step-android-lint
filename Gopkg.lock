@@ -3,18 +3,18 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:6f561a11e048a6b3e76fd7c89288e6b078f299afcd2d38e0f9616807ec541fb2"
+  digest = "1:984d13321c0b4f6b270bbcdcaaeb08531b6573011c312d6f254bc23449a356b5"
   name = "github.com/bitrise-io/go-android"
   packages = [
     "cache",
     "gradle",
   ]
   pruneopts = "UT"
-  revision = "a28433b493561a6575fcec699f93f124d22150d1"
+  revision = "f3aa5d01386be890dd80a548c3ff149643ef587c"
 
 [[projects]]
   branch = "master"
-  digest = "1:5e4f167418977858782db1d8820e8c2ccd368c8857e0806bcbd07d0bc09e1e38"
+  digest = "1:a6c4b93cbf1598f39f75f8eb10aad73caf515d130c945da2fb9eb96743b23dc7"
   name = "github.com/bitrise-io/go-steputils"
   packages = [
     "cache",
@@ -22,11 +22,11 @@
     "tools",
   ]
   pruneopts = "UT"
-  revision = "f540824d77dfd382ce84fd0ee0a9da2fba1cce0a"
+  revision = "03ae3a6ded35c5e8aed0058ec270e3494d242d17"
 
 [[projects]]
   branch = "master"
-  digest = "1:b209a202ccd9aa7f107e22bc33dbd6e06de12dd6269ae2f466599ad1ca8b07b0"
+  digest = "1:68060a468f66c2c827a1bbb89ad6c5f7d40f728e9830c8ed64f91a41f04c35c7"
   name = "github.com/bitrise-io/go-utils"
   packages = [
     "colorstring",
@@ -41,7 +41,15 @@
     "ziputil",
   ]
   pruneopts = "UT"
-  revision = "2c67c48e7086cfd8f9a29bfac2cd420d4dd1d2f9"
+  revision = "6cc2aa4d248adef509996ac484bffd38856ddf80"
+
+[[projects]]
+  digest = "1:95732e0c27df672b3fdf5cdd8edd18cba5fc07263ef7cd25eaaad4afc4730313"
+  name = "github.com/hashicorp/go-version"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "59da58cfd357de719a4d16dac30481391a56c002"
+  version = "v1.2.1"
 
 [[projects]]
   branch = "master"
