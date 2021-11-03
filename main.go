@@ -84,10 +84,15 @@ func mainE(config Config, cmdFactory command.Factory) error {
 	lintTask := gradleProject.
 		GetTask("lint")
 
+	args, err := shellquote.Split(config.Arguments)
+	if err != nil {
+		return fmt.Errorf("Failed to parse arguments, error: %s", err)
+	}
+
 	log.Infof("Variants:")
 	fmt.Println()
 
-	variants, err := lintTask.GetVariants()
+	variants, err := lintTask.GetVariants(args...)
 	if err != nil {
 		return fmt.Errorf("Failed to fetch variants, error: %s", err)
 	}
@@ -110,11 +115,6 @@ func mainE(config Config, cmdFactory command.Factory) error {
 	fmt.Println()
 
 	started := time.Now()
-
-	args, err := shellquote.Split(config.Arguments)
-	if err != nil {
-		return fmt.Errorf("Failed to parse arguments, error: %s", err)
-	}
 
 	log.Infof("Run lint:")
 	lintCommand := lintTask.GetCommand(filteredVariants, args...)
