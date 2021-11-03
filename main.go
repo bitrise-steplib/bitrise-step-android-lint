@@ -11,6 +11,8 @@ import (
 	"github.com/bitrise-io/go-android/gradle"
 	utilscache "github.com/bitrise-io/go-steputils/cache"
 	"github.com/bitrise-io/go-steputils/stepconf"
+	"github.com/bitrise-io/go-utils/command"
+	"github.com/bitrise-io/go-utils/env"
 	"github.com/bitrise-io/go-utils/log"
 	"github.com/bitrise-io/go-utils/pathutil"
 	"github.com/bitrise-io/go-utils/sliceutil"
@@ -73,8 +75,8 @@ func filterVariants(module, variant string, variantsMap gradle.Variants) (gradle
 	return filteredVariants, nil
 }
 
-func mainE(config Config) error {
-	gradleProject, err := gradle.NewProject(config.ProjectLocation)
+func mainE(config Config, cmdFactory command.Factory) error {
+	gradleProject, err := gradle.NewProject(config.ProjectLocation, cmdFactory)
 	if err != nil {
 		return fmt.Errorf("Failed to open project, error: %s", err)
 	}
@@ -184,13 +186,15 @@ func main() {
 	stepconf.Print(config)
 	fmt.Println()
 
-	if err := mainE(config); err != nil {
+	cmdFactory := command.NewFactory(env.NewRepository())
+
+	if err := mainE(config, cmdFactory); err != nil {
 		failf("%s", err)
 	}
 
 	fmt.Println()
 	log.Infof("Collecting cache:")
-	if warning := cache.Collect(config.ProjectLocation, utilscache.Level(config.CacheLevel)); warning != nil {
+	if warning := cache.Collect(config.ProjectLocation, utilscache.Level(config.CacheLevel), cmdFactory); warning != nil {
 		log.Warnf("%s", warning)
 	}
 	log.Donef("  Done")
