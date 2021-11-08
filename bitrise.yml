@@ -41,6 +41,8 @@ workflows:
         - gradlew_path: ./gradlew
     - path::./:
         title: Test simple android project
+        inputs:
+        - arguments: --info
     - change-workdir:
         title: cd $BITRISE_SOURCE_DIR/_tmp/mono_repo
         run_if: true
