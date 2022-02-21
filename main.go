@@ -78,15 +78,14 @@ func filterVariants(module, variant string, variantsMap gradle.Variants) (gradle
 func mainE(config Config, cmdFactory command.Factory) error {
 	gradleProject, err := gradle.NewProject(config.ProjectLocation, cmdFactory)
 	if err != nil {
-		return fmt.Errorf("Failed to open project, error: %s", err)
+		return fmt.Errorf("process config: failed to open project, error: %s", err)
 	}
 
-	lintTask := gradleProject.
-		GetTask("lint")
+	lintTask := gradleProject.GetTask("lint")
 
 	args, err := shellquote.Split(config.Arguments)
 	if err != nil {
-		return fmt.Errorf("Failed to parse arguments, error: %s", err)
+		return fmt.Errorf("process config: failed to parse arguments, error: %s", err)
 	}
 
 	log.Infof("Variants:")
@@ -94,12 +93,12 @@ func mainE(config Config, cmdFactory command.Factory) error {
 
 	variants, err := lintTask.GetVariants(args...)
 	if err != nil {
-		return fmt.Errorf("Failed to fetch variants, error: %s", err)
+		return fmt.Errorf("run: failed to fetch variants, error: %s", err)
 	}
 
 	filteredVariants, err := filterVariants(config.Module, config.Variant, variants)
 	if err != nil {
-		failf("Failed to find buildable variants, error: %s", err)
+		failf("process config: failed to find buildable variants, error: %s", err)
 	}
 
 	for module, variants := range variants {
@@ -125,7 +124,7 @@ func mainE(config Config, cmdFactory command.Factory) error {
 
 	taskError := lintCommand.Run()
 	if taskError != nil {
-		log.Errorf("Lint task failed, error: %v", taskError)
+		log.Errorf("run: lint task failed, error: %v", taskError)
 	}
 	fmt.Println()
 
@@ -134,7 +133,7 @@ func mainE(config Config, cmdFactory command.Factory) error {
 
 	artifacts, err := getArtifacts(gradleProject, started, config.ReportPathPattern)
 	if err != nil {
-		return fmt.Errorf("failed to find artifacts, error: %v", err)
+		return fmt.Errorf("export outputs: failed to find artifacts, error: %v", err)
 	}
 
 	if len(artifacts) > 0 {
@@ -143,7 +142,7 @@ func mainE(config Config, cmdFactory command.Factory) error {
 				filepath.Join(config.DeployDir, artifact.Name),
 			)
 			if err != nil {
-				return fmt.Errorf("failed to check path, error: %v", err)
+				return fmt.Errorf("export outputs: failed to check path, error: %v", err)
 			}
 
 			artifactName := filepath.Base(artifact.Path)
@@ -180,7 +179,7 @@ func main() {
 	var config Config
 
 	if err := stepconf.Parse(&config); err != nil {
-		failf("Couldn't create step config: %v\n", err)
+		failf("process config: couldn't create step config: %v\n", err)
 	}
 
 	stepconf.Print(config)
