@@ -16,7 +16,7 @@ import (
 	"github.com/bitrise-io/go-utils/log"
 	"github.com/bitrise-io/go-utils/pathutil"
 	"github.com/bitrise-io/go-utils/sliceutil"
-	shellquote "github.com/kballard/go-shellquote"
+	"github.com/kballard/go-shellquote"
 )
 
 // Config ...
@@ -30,6 +30,8 @@ type Config struct {
 	DeployDir         string `env:"BITRISE_DEPLOY_DIR,dir"`
 }
 
+var logger = log.NewLogger(false)
+
 func getArtifacts(gradleProject gradle.Project, started time.Time, pattern string) (artifacts []gradle.Artifact, err error) {
 	artifacts, err = gradleProject.FindArtifacts(started, pattern, true)
 	if err != nil {
@@ -37,13 +39,13 @@ func getArtifacts(gradleProject gradle.Project, started time.Time, pattern strin
 	}
 	if len(artifacts) == 0 {
 		if !started.IsZero() {
-			log.Warnf("No artifacts found with pattern: %s that has modification time after: %s", pattern, started)
-			log.Warnf("Retrying without modtime check....")
-			fmt.Println()
+			logger.Warnf("No artifacts found with pattern: %s that has modification time after: %s", pattern, started)
+			logger.Warnf("Retrying without modtime check....")
+			logger.Println()
 			return getArtifacts(gradleProject, time.Time{}, pattern)
 		}
-		log.Warnf("No artifacts found with pattern: %s without modtime check", pattern)
-		log.Warnf("If you have changed default report export path in your gradle files then you might need to change ReportPathPattern accordingly.")
+		logger.Warnf("No artifacts found with pattern: %s without modtime check", pattern)
+		logger.Warnf("If you have changed default report export path in your gradle files then you might need to change ReportPathPattern accordingly.")
 	}
 	return
 }
@@ -75,66 +77,65 @@ func filterVariants(module, variant string, variantsMap gradle.Variants) (gradle
 	return filteredVariants, nil
 }
 
-func mainE(config Config, cmdFactory command.Factory) error {
+func mainE(config Config, cmdFactory command.Factory, logger log.Logger) error {
 	gradleProject, err := gradle.NewProject(config.ProjectLocation, cmdFactory)
 	if err != nil {
-		return fmt.Errorf("Failed to open project, error: %s", err)
+		return fmt.Errorf("Process config: failed to open project, error: %s", err)
 	}
 
-	lintTask := gradleProject.
-		GetTask("lint")
+	lintTask := gradleProject.GetTask("lint")
 
 	args, err := shellquote.Split(config.Arguments)
 	if err != nil {
-		return fmt.Errorf("Failed to parse arguments, error: %s", err)
+		return fmt.Errorf("Process config: failed to parse arguments, error: %s", err)
 	}
 
-	log.Infof("Variants:")
+	logger.Infof("Variants:")
 	fmt.Println()
 
 	variants, err := lintTask.GetVariants(args...)
 	if err != nil {
-		return fmt.Errorf("Failed to fetch variants, error: %s", err)
+		return fmt.Errorf("Run: failed to fetch variants, error: %s", err)
 	}
 
 	filteredVariants, err := filterVariants(config.Module, config.Variant, variants)
 	if err != nil {
-		failf("Failed to find buildable variants, error: %s", err)
+		failf("Process config: failed to find buildable variants, error: %s", err)
 	}
 
 	for module, variants := range variants {
-		log.Printf("%s:", module)
+		logger.Printf("%s:", module)
 		for _, variant := range variants {
 			if sliceutil.IsStringInSlice(variant, filteredVariants[module]) {
-				log.Donef("✓ %s", strings.TrimSuffix(variant, "UnitTest"))
+				logger.Donef("✓ %s", strings.TrimSuffix(variant, "UnitTest"))
 				continue
 			}
-			log.Printf("- %s", strings.TrimSuffix(variant, "UnitTest"))
+			logger.Printf("- %s", strings.TrimSuffix(variant, "UnitTest"))
 		}
 	}
 	fmt.Println()
 
 	started := time.Now()
 
-	log.Infof("Run lint:")
+	logger.Infof("Run lint:")
 	lintCommand := lintTask.GetCommand(filteredVariants, args...)
 
 	fmt.Println()
-	log.Donef("$ " + lintCommand.PrintableCommandArgs())
+	logger.Donef("$ " + lintCommand.PrintableCommandArgs())
 	fmt.Println()
 
 	taskError := lintCommand.Run()
 	if taskError != nil {
-		log.Errorf("Lint task failed, error: %v", taskError)
+		logger.Errorf("Run: lint task failed, error: %v", taskError)
 	}
 	fmt.Println()
 
-	log.Infof("Exporting artifacts:")
+	logger.Infof("Exporting artifacts:")
 	fmt.Println()
 
 	artifacts, err := getArtifacts(gradleProject, started, config.ReportPathPattern)
 	if err != nil {
-		return fmt.Errorf("failed to find artifacts, error: %v", err)
+		return fmt.Errorf("Export outputs: failed to find artifacts, error: %v", err)
 	}
 
 	if len(artifacts) > 0 {
@@ -143,7 +144,7 @@ func mainE(config Config, cmdFactory command.Factory) error {
 				filepath.Join(config.DeployDir, artifact.Name),
 			)
 			if err != nil {
-				return fmt.Errorf("failed to check path, error: %v", err)
+				return fmt.Errorf("Export outputs: failed to check path, error: %v", err)
 			}
 
 			artifactName := filepath.Base(artifact.Path)
@@ -156,23 +157,23 @@ func mainE(config Config, cmdFactory command.Factory) error {
 				artifact.Name = fmt.Sprintf("%s-%s%s", name, timestamp, ext)
 			}
 
-			log.Printf("  Export [ %s => $BITRISE_DEPLOY_DIR/%s ]", artifactName, artifact.Name)
+			logger.Printf("  Export [ %s => $BITRISE_DEPLOY_DIR/%s ]", artifactName, artifact.Name)
 
 			if err := artifact.Export(config.DeployDir); err != nil {
-				log.Warnf("failed to export artifacts, error: %v", err)
+				logger.Warnf("failed to export artifacts, error: %v", err)
 			}
 		}
 	} else {
-		log.Warnf("No artifacts found with pattern: %s", config.ReportPathPattern)
-		log.Warnf("If you have changed default report file paths with lintOptions/htmlOutput or lintOptions/xmlOutput")
-		log.Warnf("in your gradle files then you might need to change ReportPathPattern accordingly.")
+		logger.Warnf("No artifacts found with pattern: %s", config.ReportPathPattern)
+		logger.Warnf("If you have changed default report file paths with lintOptions/htmlOutput or lintOptions/xmlOutput")
+		logger.Warnf("in your gradle files then you might need to change ReportPathPattern accordingly.")
 	}
 
 	return taskError
 }
 
 func failf(f string, args ...interface{}) {
-	log.Errorf(f, args...)
+	logger.Errorf(f, args...)
 	os.Exit(1)
 }
 
@@ -180,7 +181,7 @@ func main() {
 	var config Config
 
 	if err := stepconf.Parse(&config); err != nil {
-		failf("Couldn't create step config: %v\n", err)
+		failf("Process config: couldn't create step config: %v\n", err)
 	}
 
 	stepconf.Print(config)
@@ -188,14 +189,14 @@ func main() {
 
 	cmdFactory := command.NewFactory(env.NewRepository())
 
-	if err := mainE(config, cmdFactory); err != nil {
+	if err := mainE(config, cmdFactory, logger); err != nil {
 		failf("%s", err)
 	}
 
 	fmt.Println()
-	log.Infof("Collecting cache:")
+	logger.Infof("Collecting cache:")
 	if warning := cache.Collect(config.ProjectLocation, utilscache.Level(config.CacheLevel), cmdFactory); warning != nil {
-		log.Warnf("%s", warning)
+		logger.Warnf("%s", warning)
 	}
-	log.Donef("  Done")
+	logger.Donef("  Done")
 }
