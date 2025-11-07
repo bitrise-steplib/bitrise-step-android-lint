@@ -1,91 +1,69 @@
 # Android Lint
 
-Runs lint gradle task on your project.
+[![Step changelog](https://shields.io/github/v/release/bitrise-steplib/bitrise-step-android-lint?include_prereleases&label=changelog&color=blueviolet)](https://github.com/bitrise-steplib/bitrise-step-android-lint/releases)
 
-## How to use this Step
+Runs Lint on your Android project source files and detects potential syntax errors to keep your code error free.
 
-Can be run directly with the [bitrise CLI](https://github.com/bitrise-io/bitrise),
-just `git clone` this repository, `cd` into it's folder in your Terminal/Command Line
-and call `bitrise run test`.
+<details>
+<summary>Description</summary>
 
-*Check the `bitrise.yml` file for required inputs which have to be
-added to your `.bitrise.secrets.yml` file!*
+It highlights the code line where the error is found, explains the type of error and suggests corrections. The Step does not make the build fail if it spots any structural errors in your code. If you have inserted the **Deploy to Bitrise.io** Step in the Workflow, the tes results will be available in a viewable or downloadable Lint Report HTML or XML file which you can access on the Build's APPS & ARTIFACTS page.
 
-Step by step:
+### Configuring the Step
 
-1. Open up your Terminal / Command Line
-2. `git clone` the repository
-3. `cd` into the directory of the step (the one you just `git clone`d)
-5. Create a `.bitrise.secrets.yml` file in the same directory of `bitrise.yml` - the `.bitrise.secrets.yml` is a git ignored file, you can store your secrets in
-6. Check the `bitrise.yml` file for any secret you should set in `.bitrise.secrets.yml`
-  * Best practice is to mark these options with something like `# define these in your .bitrise.secrets.yml`, in the `app:envs` section.
-7. Once you have all the required secret parameters in your `.bitrise.secrets.yml` you can just run this step with the [bitrise CLI](https://github.com/bitrise-io/bitrise): `bitrise run test`
+1. Set the **Project Location** input which, by default, points to the root directory of your Android project.
+2. Set the module and variant you wish to lint in the **Module** and **Variant** fields.
 
-An example `.bitrise.secrets.yml` file:
+Optionally, you can modify these inputs:
+1. You can specify where the Lint reports should be found once the Step has run if you overwrite the **Report location pattern** input.
+2. You can set if the Step should cache build outputs and dependencies, only the dependencies or nothing at all in the **Set level of cache** input.
+3. You can set any gradle argument to the gradle task in the **Additional Gradle Arguments** input.
 
-```
-envs:
-- A_SECRET_PARAM_ONE: the value for secret one
-- A_SECRET_PARAM_TWO: the value for secret two
-```
+### Troubleshooting
+Make sure you insert the Step before a build Step.
+Make sure you type the correct module and variant names in the respective fields of the Step. If you are unsure about the exact names, you can check them in the **Project Structure** dialog of your project in Android Studio.
 
-## How to create your own step
+### Useful links
+- [Improve your code with lint checks](https://developer.android.com/studio/write/lint)
 
-1. Create a new git repository for your step (**don't fork** the *step template*, create a *new* repository)
-2. Copy the [step template](https://github.com/bitrise-steplib/step-template) files into your repository
-3. Fill the `step.sh` with your functionality
-4. Wire out your inputs to `step.yml` (`inputs` section)
-5. Fill out the other parts of the `step.yml` too
-6. Provide test values for the inputs in the `bitrise.yml`
-7. Run your step with `bitrise run test` - if it works, you're ready
+### Related Steps
+- [Android Build](https://www.bitrise.io/integrations/steps/android-build)
+- [Android Unit Test](https://www.bitrise.io/integrations/steps/android-unit-test)
+- [[BETA] Virtual Device Testing for Android](https://www.bitrise.io/integrations/steps/virtual-device-testing-for-android)
+</details>
 
-__For Step development guidelines & best practices__ check this documentation: [https://github.com/bitrise-io/bitrise/blob/master/_docs/step-development-guideline.md](https://github.com/bitrise-io/bitrise/blob/master/_docs/step-development-guideline.md).
+## 🧩 Get started
 
-**NOTE:**
+Add this step directly to your workflow in the [Bitrise Workflow Editor](https://docs.bitrise.io/en/bitrise-ci/workflows-and-pipelines/steps/adding-steps-to-a-workflow.html).
 
-If you want to use your step in your project's `bitrise.yml`:
+You can also run this step directly with [Bitrise CLI](https://github.com/bitrise-io/bitrise).
 
-1. git push the step into it's repository
-2. reference it in your `bitrise.yml` with the `git::PUBLIC-GIT-CLONE-URL@BRANCH` step reference style:
+## ⚙️ Configuration
 
-```
-- git::https://github.com/user/my-step.git@branch:
-   title: My step
-   inputs:
-   - my_input_1: "my value 1"
-   - my_input_2: "my value 2"
-```
+<details>
+<summary>Inputs</summary>
 
-You can find more examples of step reference styles
-in the [bitrise CLI repository](https://github.com/bitrise-io/bitrise/blob/master/_examples/tutorials/steps-and-workflows/bitrise.yml#L65).
+| Key | Description | Flags | Default |
+| --- | --- | --- | --- |
+| `project_location` | The root directory of your android project, for example, where your root build gradle file exists (also gradlew, settings.gradle, etc...) | required | `$BITRISE_SOURCE_DIR` |
+| `module` | Set the module that you want to lint. To see your available modules please open your project in Android Studio and go in [Project Structure] and see the list on the left.  |  |  |
+| `variant` | Set the variant that you want to lint. To see your available variants please open your project in Android Studio and go in [Project Structure] -> variants section.  |  |  |
+| `report_path_pattern` | Will find the report file with the given pattern. If you need the xml file then you can use: "*/build/reports/lint-results*.xml"  | required | `*/build/reports/lint-results*.html` |
+| `cache_level` | `all` - will cache build cache and dependencies `only_deps` - will cache dependencies only `none` - will not cache anything | required | `only_deps` |
+| `arguments` | Extra arguments passed to the gradle task |  |  |
+</details>
 
-## How to contribute to this Step
+<details>
+<summary>Outputs</summary>
+There are no outputs defined in this step
+</details>
 
-1. Fork this repository
-2. `git clone` it
-3. Create a branch you'll work on
-4. To use/test the step just follow the **How to use this Step** section
-5. Do the changes you want to
-6. Run/test the step before sending your contribution
-  * You can also test the step in your `bitrise` project, either on your Mac or on [bitrise.io](https://www.bitrise.io)
-  * You just have to replace the step ID in your project's `bitrise.yml` with either a relative path, or with a git URL format
-  * (relative) path format: instead of `- original-step-id:` use `- path::./relative/path/of/script/on/your/Mac:`
-  * direct git URL format: instead of `- original-step-id:` use `- git::https://github.com/user/step.git@branch:`
-  * You can find more example of alternative step referencing at: https://github.com/bitrise-io/bitrise/blob/master/_examples/tutorials/steps-and-workflows/bitrise.yml
-7. Once you're done just commit your changes & create a Pull Request
+## 🙋 Contributing
 
+We welcome [pull requests](https://github.com/bitrise-steplib/bitrise-step-android-lint/pulls) and [issues](https://github.com/bitrise-steplib/bitrise-step-android-lint/issues) against this repository.
 
-## Share your own Step
+For pull requests, work on your changes in a forked repository and use the Bitrise CLI to [run step tests locally](https://docs.bitrise.io/en/bitrise-ci/bitrise-cli/running-your-first-local-build-with-the-cli.html).
 
-You can share your Step or step version with the [bitrise CLI](https://github.com/bitrise-io/bitrise). If you use the `bitrise.yml` included in this repository, all you have to do is:
+Learn more about developing steps:
 
-1. In your Terminal / Command Line `cd` into this directory (where the `bitrise.yml` of the step is located)
-1. Run: `bitrise run test` to test the step
-1. Run: `bitrise run audit-this-step` to audit the `step.yml`
-1. Check the `share-this-step` workflow in the `bitrise.yml`, and fill out the
-   `envs` if you haven't done so already (don't forget to bump the version number if this is an update
-   of your step!)
-1. Then run: `bitrise run share-this-step` to share the step (version) you specified in the `envs`
-1. Send the Pull Request, as described in the logs of `bitrise run share-this-step`
-
-That's all ;)
+- [Create your own step](https://docs.bitrise.io/en/bitrise-ci/workflows-and-pipelines/developing-your-own-bitrise-step/developing-a-new-step.html)
