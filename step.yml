@@ -1,4 +1,4 @@
-title: "Android Lint"
+title: Android Lint
 summary: |-
   Runs Lint on your Android project source files and detects potential syntax errors to keep your code error free.
 description: |-
@@ -8,7 +8,7 @@ description: |-
 
   1. Set the **Project Location** input which, by default, points to the root directory of your Android project.
   2. Set the module and variant you wish to lint in the **Module** and **Variant** fields.
-  
+
   Optionally, you can modify these inputs:
   1. You can specify where the Lint reports should be found once the Step has run if you overwrite the **Report location pattern** input.
   2. You can set if the Step should cache build outputs and dependencies, only the dependencies or nothing at all in the **Set level of cache** input.
@@ -17,7 +17,7 @@ description: |-
   ### Troubleshooting
   Make sure you insert the Step before a build Step.
   Make sure you type the correct module and variant names in the respective fields of the Step. If you are unsure about the exact names, you can check them in the **Project Structure** dialog of your project in Android Studio.
-  
+
   ### Useful links
   - [Improve your code with lint checks](https://developer.android.com/studio/write/lint)
 
@@ -29,19 +29,19 @@ website: https://github.com/bitrise-steplib/bitrise-step-android-lint
 source_code_url: https://github.com/bitrise-steplib/bitrise-step-android-lint
 support_url: https://github.com/bitrise-steplib/bitrise-step-android-lint/issues
 host_os_tags:
-  - osx-10.10
-  - ubuntu-16.04
+- osx-10.10
+- ubuntu-16.04
 
 project_type_tags:
-  - android
-  - cordova
-  - flutter
-  - ionic
-  - kotlin-multiplatform
-  - react-native
+- android
+- cordova
+- flutter
+- ionic
+- kotlin-multiplatform
+- react-native
 
 type_tags:
-  - test
+- test
 
 is_requires_admin_user: true
 is_always_run: false
@@ -52,54 +52,54 @@ toolkit:
     package_name: github.com/bitrise-steplib/bitrise-step-android-lint
 
 inputs:
-  - project_location: $BITRISE_SOURCE_DIR
-    opts:
-      title: Project Location
-      summary: "The root directory of your android project, for example, where your root build gradle file exists (also gradlew, settings.gradle, etc...)"
-      description: "The root directory of your android project, for example, where your root build gradle file exists (also gradlew, settings.gradle, etc...)"
-      is_required: true
-  - module: ""
-    opts:
-      title: Module
-      summary: |
-        Set the module that you want to lint. To see your available modules please open your project in Android Studio and go in [Project Structure] and see the list on the left.
-      description: |
-        Set the module that you want to lint. To see your available modules please open your project in Android Studio and go in [Project Structure] and see the list on the left.
-      is_required: false
-  - variant: ""
-    opts:
-      title: Variant
-      summary: |
-        Set the variant that you want to lint. To see your available variants please open your project in Android Studio and go in [Project Structure] -> variants section.
-      description: |
-        Set the variant that you want to lint. To see your available variants please open your project in Android Studio and go in [Project Structure] -> variants section.
-      is_required: false
-  - report_path_pattern: "*/build/reports/lint-results*.html"
-    opts:
-      category: Options
-      title: Report location pattern
-      summary: |
-        Will find the report file with the given pattern. If you need the xml file then you can use: "*/build/reports/lint-results*.xml"
-      description: |
-        Will find the report file with the given pattern. If you need the xml file then you can use: "*/build/reports/lint-results*.xml"
-      is_required: true
-  - cache_level: "only_deps"
-    opts:
-      category: Options
-      title: Set the level of cache
-      description: |-
-        `all` - will cache build cache and dependencies
-        `only_deps` - will cache dependencies only
-        `none` - will not cache anything
-      is_required: true
-      value_options:
-      - "all"
-      - "only_deps"
-      - "none"
-  - arguments:
-    opts:
-      category: Options
-      title: Additional Gradle Arguments 
-      summary: Extra arguments passed to the gradle task
-      description: Extra arguments passed to the gradle task
-      is_required: false
+- project_location: $BITRISE_SOURCE_DIR
+  opts:
+    title: Project Location
+    summary: The root directory of your android project, for example, where your root build gradle file exists (also gradlew, settings.gradle, etc...)
+    description: The root directory of your android project, for example, where your root build gradle file exists (also gradlew, settings.gradle, etc...)
+    is_required: true
+- module: ""
+  opts:
+    title: Module
+    summary: |
+      Set the module that you want to lint. To see your available modules please open your project in Android Studio and go in [Project Structure] and see the list on the left.
+    description: |
+      Set the module that you want to lint. To see your available modules please open your project in Android Studio and go in [Project Structure] and see the list on the left.
+    is_required: false
+- variant: ""
+  opts:
+    title: Variant
+    summary: |
+      Set the variant that you want to lint. To see your available variants please open your project in Android Studio and go in [Project Structure] -> variants section.
+    description: |
+      Set the variant that you want to lint. To see your available variants please open your project in Android Studio and go in [Project Structure] -> variants section.
+    is_required: false
+- report_path_pattern: "*/build/reports/lint-results*.html"
+  opts:
+    category: Options
+    title: Report location pattern
+    summary: |
+      Will find the report file with the given pattern. If you need the xml file then you can use: "*/build/reports/lint-results*.xml"
+    description: |
+      Will find the report file with the given pattern. If you need the xml file then you can use: "*/build/reports/lint-results*.xml"
+    is_required: true
+- cache_level: only_deps
+  opts:
+    category: Options
+    title: Set the level of cache
+    description: |-
+      `all` - will cache build cache and dependencies
+      `only_deps` - will cache dependencies only
+      `none` - will not cache anything
+    is_required: true
+    value_options:
+    - all
+    - only_deps
+    - none
+- arguments:
+  opts:
+    category: Options
+    title: Additional Gradle Arguments
+    summary: Extra arguments passed to the gradle task
+    description: Extra arguments passed to the gradle task
+    is_required: false

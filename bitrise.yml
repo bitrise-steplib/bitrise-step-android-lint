@@ -12,8 +12,7 @@ workflows:
   test:
     title: Test simple android project & mono repo projects
     before_run:
-    - audit-this-step
-    - go-tests
+    - check
     after_run:
     - simple-and-mono-repo-in-src-dir
     - simple-and-mono-repo-in-root-tmp-dir
@@ -123,23 +122,9 @@ workflows:
     - path::./:
         title: Test monorepo
 
-  go-tests:
+  check:
     steps:
-    - go-list:
-    - golint:
-    - errcheck:
-    - go-test:
-
-  # ----------------------------------------------------------------
-  # --- workflows to Share this step into a Step Library
-  audit-this-step:
-    steps:
-    - script:
-        inputs:
-        - content: |-
-            #!/bin/bash
-            set -ex
-            stepman audit --step-yml ./step.yml
+    - git::https://github.com/bitrise-steplib/steps-check.git: { }
 
   generate_readme:
     steps:
