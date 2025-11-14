@@ -7,6 +7,7 @@ app:
   - MY_STEPLIB_REPO_FORK_GIT_URL: $MY_STEPLIB_REPO_FORK_GIT_URL
   - SIMPLE_REPO_GIT_CLONE_URL: https://github.com/bitrise-samples/android-multiple-test-results-sample.git
   - MONO_REPO_GIT_CLONE_URL: https://github.com/bitrise-samples/android-testing.git
+  - JDK_VERSION: "17"
 
 workflows:
   test_simple-and-mono-repo-in-src-dir:
@@ -28,6 +29,10 @@ workflows:
         - content: |
             #!/bin/bash
             git clone $SIMPLE_REPO_GIT_CLONE_URL .
+    - set-java-version@1:
+        run_if: $.IsCI
+        inputs:
+        - set_java_version: $JDK_VERSION
     - install-missing-android-tools:
         inputs:
         - gradlew_path: ./gradlew
@@ -79,6 +84,10 @@ workflows:
         - content: |
             #!/bin/bash
             git clone $SIMPLE_REPO_GIT_CLONE_URL .
+    - set-java-version@1:
+        run_if: $.IsCI
+        inputs:
+        - set_java_version: $JDK_VERSION
     - install-missing-android-tools:
         inputs:
         - gradlew_path: ./gradlew
