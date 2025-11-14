@@ -1,0 +1,116 @@
+format_version: "11"
+default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
+
+app:
+  envs:
+  - BITRISE_STEP_GIT_CLONE_URL: https://github.com/bitrise-steplib/bitrise-step-android-lint.git
+  - MY_STEPLIB_REPO_FORK_GIT_URL: $MY_STEPLIB_REPO_FORK_GIT_URL
+  - SIMPLE_REPO_GIT_CLONE_URL: https://github.com/bitrise-samples/android-multiple-test-results-sample.git
+  - MONO_REPO_GIT_CLONE_URL: https://github.com/bitrise-samples/android-testing.git
+
+workflows:
+  test_simple-and-mono-repo-in-src-dir:
+    title: Test simple android project & mono repo projects in source dir
+    steps:
+    - script:
+        inputs:
+        - content: |
+            #!/bin/bash
+            rm -rf _tmp
+    - change-workdir:
+        title: cd $BITRISE_SOURCE_DIR/_tmp
+        run_if: true
+        inputs:
+        - path: ./_tmp
+        - is_create_path: true
+    - script:
+        inputs:
+        - content: |
+            #!/bin/bash
+            git clone $SIMPLE_REPO_GIT_CLONE_URL .
+    - install-missing-android-tools:
+        inputs:
+        - gradlew_path: ./gradlew
+    - path::./:
+        title: Test simple android project
+        inputs:
+        - arguments: --info
+    - change-workdir:
+        title: cd $BITRISE_SOURCE_DIR/_tmp/mono_repo
+        run_if: true
+        inputs:
+        - path: ./mono_repo
+        - is_create_path: true
+    - script:
+        inputs:
+        - content: |
+            #!/bin/bash
+            git clone $MONO_REPO_GIT_CLONE_URL .
+    - change-workdir:
+        title: cd $BITRISE_SOURCE_DIR/_tmp/mono_repo/ui/espresso/IdlingResourceSample
+        run_if: true
+        inputs:
+        - path: ./ui/espresso/IdlingResourceSample
+        - is_create_path: true
+    - path::./:
+        title: Test monorepo
+    - path::./:
+        title: Test monorepo with module and variant set
+        inputs:
+        - module: app
+        - variant: Debug
+
+  test_simple-and-mono-repo-in-root-tmp-dir:
+    title: Test simple android project & mono repo projects in /tmp dir
+    steps:
+    - script:
+        inputs:
+        - content: |
+            #!/bin/bash
+            rm -rf /tmp/_tmp
+    - change-workdir:
+        title: cd /tmp/_tmp
+        run_if: true
+        inputs:
+        - path: /tmp/_tmp
+        - is_create_path: true
+    - script:
+        inputs:
+        - content: |
+            #!/bin/bash
+            git clone $SIMPLE_REPO_GIT_CLONE_URL .
+    - install-missing-android-tools:
+        inputs:
+        - gradlew_path: ./gradlew
+    - path::./:
+        title: Test simple repo
+    - change-workdir:
+        title: cd /tmp
+        run_if: true
+        inputs:
+        - path: /tmp
+        - is_create_path: true
+    - script:
+        inputs:
+        - content: |
+            #!/bin/bash
+            rm -rf /tmp/_tmp
+    - change-workdir:
+        title: cd /tmp/_tmp
+        run_if: true
+        inputs:
+        - path: /tmp/_tmp
+        - is_create_path: true
+    - script:
+        inputs:
+        - content: |
+            #!/bin/bash
+            git clone $MONO_REPO_GIT_CLONE_URL .
+    - change-workdir:
+        title: cd /tmp/ui/espresso/IdlingResourceSample
+        run_if: true
+        inputs:
+        - path: ./ui/espresso/IdlingResourceSample
+        - is_create_path: true
+    - path::./:
+        title: Test monorepo
