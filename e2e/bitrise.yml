@@ -3,6 +3,7 @@ default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
 
 app:
   envs:
+  - ORIG_BITRISE_SOURCE_DIR: $BITRISE_SOURCE_DIR
   - BITRISE_STEP_GIT_CLONE_URL: https://github.com/bitrise-steplib/bitrise-step-android-lint.git
   - MY_STEPLIB_REPO_FORK_GIT_URL: $MY_STEPLIB_REPO_FORK_GIT_URL
   - SIMPLE_REPO_GIT_CLONE_URL: https://github.com/bitrise-samples/android-multiple-test-results-sample.git
@@ -17,12 +18,12 @@ workflows:
         inputs:
         - content: |
             #!/bin/bash
-            rm -rf _tmp
+            rm -rf "$ORIG_BITRISE_SOURCE_DIR/_tmp"
     - change-workdir:
-        title: cd $BITRISE_SOURCE_DIR/_tmp
+        title: cd $ORIG_BITRISE_SOURCE_DIR/_tmp
         run_if: true
         inputs:
-        - path: ./_tmp
+        - path: $ORIG_BITRISE_SOURCE_DIR/_tmp
         - is_create_path: true
     - script:
         inputs:
@@ -41,10 +42,10 @@ workflows:
         inputs:
         - arguments: --info
     - change-workdir:
-        title: cd $BITRISE_SOURCE_DIR/_tmp/mono_repo
+        title: cd $ORIG_BITRISE_SOURCE_DIR/_tmp/mono_repo
         run_if: true
         inputs:
-        - path: ./mono_repo
+        - path: $ORIG_BITRISE_SOURCE_DIR/_tmp/mono_repo
         - is_create_path: true
     - script:
         inputs:
@@ -52,10 +53,10 @@ workflows:
             #!/bin/bash
             git clone $MONO_REPO_GIT_CLONE_URL .
     - change-workdir:
-        title: cd $BITRISE_SOURCE_DIR/_tmp/mono_repo/ui/espresso/IdlingResourceSample
+        title: cd $ORIG_BITRISE_SOURCE_DIR/_tmp/mono_repo/ui/espresso/IdlingResourceSample
         run_if: true
         inputs:
-        - path: ./ui/espresso/IdlingResourceSample
+        - path: $ORIG_BITRISE_SOURCE_DIR/_tmp/mono_repo/ui/espresso/IdlingResourceSample
         - is_create_path: true
     - path::./:
         title: Test monorepo
@@ -72,12 +73,12 @@ workflows:
         inputs:
         - content: |
             #!/bin/bash
-            rm -rf /tmp/_tmp
+            rm -rf "$ORIG_BITRISE_SOURCE_DIR/_tmp"
     - change-workdir:
-        title: cd /tmp/_tmp
+        title: cd $ORIG_BITRISE_SOURCE_DIR/_tmp
         run_if: true
         inputs:
-        - path: /tmp/_tmp
+        - path: $ORIG_BITRISE_SOURCE_DIR/_tmp
         - is_create_path: true
     - script:
         inputs:
@@ -93,22 +94,16 @@ workflows:
         - gradlew_path: ./gradlew
     - path::./:
         title: Test simple repo
-    - change-workdir:
-        title: cd /tmp
-        run_if: true
-        inputs:
-        - path: /tmp
-        - is_create_path: true
     - script:
         inputs:
         - content: |
             #!/bin/bash
-            rm -rf /tmp/_tmp
+            rm -rf "$ORIG_BITRISE_SOURCE_DIR/_tmp"
     - change-workdir:
-        title: cd /tmp/_tmp
+        title: cd $ORIG_BITRISE_SOURCE_DIR/_tmp
         run_if: true
         inputs:
-        - path: /tmp/_tmp
+        - path: $ORIG_BITRISE_SOURCE_DIR/_tmp
         - is_create_path: true
     - script:
         inputs:
@@ -116,10 +111,10 @@ workflows:
             #!/bin/bash
             git clone $MONO_REPO_GIT_CLONE_URL .
     - change-workdir:
-        title: cd /tmp/ui/espresso/IdlingResourceSample
+        title: cd $ORIG_BITRISE_SOURCE_DIR/_tmp/ui/espresso/IdlingResourceSample
         run_if: true
         inputs:
-        - path: ./ui/espresso/IdlingResourceSample
+        - path: $ORIG_BITRISE_SOURCE_DIR/_tmp/ui/espresso/IdlingResourceSample
         - is_create_path: true
     - path::./:
         title: Test monorepo
