@@ -20,6 +20,9 @@ github.com/bitrise-io/go-utils/pathutil
 github.com/bitrise-io/go-utils/pointers
 github.com/bitrise-io/go-utils/sliceutil
 github.com/bitrise-io/go-utils/ziputil
+# github.com/bitrise-io/go-utils/v2 v2.0.0-alpha.30
+## explicit
+github.com/bitrise-io/go-utils/v2/env
 # github.com/hashicorp/go-version v1.3.0
 github.com/hashicorp/go-version
 # github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51
