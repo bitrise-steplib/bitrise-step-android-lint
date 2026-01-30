@@ -6,6 +6,7 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 
@@ -18,12 +19,11 @@ import (
 
 // AndroidGradleCacheItemCollector ...
 type AndroidGradleCacheItemCollector struct {
-	cmdFactory command.Factory
 }
 
 // NewAndroidGradleCacheItemCollector ...
-func NewAndroidGradleCacheItemCollector(cmdFactory command.Factory) cache.ItemCollector {
-	return AndroidGradleCacheItemCollector{cmdFactory: cmdFactory}
+func NewAndroidGradleCacheItemCollector() cache.ItemCollector {
+	return AndroidGradleCacheItemCollector{}
 }
 
 // Collect ...
@@ -39,12 +39,12 @@ func (c AndroidGradleCacheItemCollector) Collect(dir string, cacheLevel cache.Le
 		return nil, nil, fmt.Errorf("cache collection skipped: failed to determine project root path")
 	}
 
-	includePths, err := c.collectIncludePaths(homeDir, projectRoot, cacheLevel)
+	includePths, err := collectIncludePaths(homeDir, projectRoot, cacheLevel)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	excludePths := c.collectExcludePaths(homeDir, projectRoot)
+	excludePths := collectExcludePaths(homeDir, projectRoot)
 
 	return includePths, excludePths, nil
 }
@@ -53,8 +53,8 @@ func (c AndroidGradleCacheItemCollector) Collect(dir string, cacheLevel cache.Le
 // paths for caching based on the value of cacheLevel. Returns an error if there
 // was an underlying error that would lead to a corrupted cache file, otherwise
 // the given path is skipped.
-func Collect(projectRoot string, cacheLevel cache.Level, cmdFactory command.Factory) error {
-	cacheItemCollector := NewAndroidGradleCacheItemCollector(cmdFactory)
+func Collect(projectRoot string, cacheLevel cache.Level) error {
+	cacheItemCollector := NewAndroidGradleCacheItemCollector()
 	includes, excludes, err := cacheItemCollector.Collect(projectRoot, cacheLevel)
 	if err != nil {
 		return err
@@ -74,7 +74,7 @@ func Collect(projectRoot string, cacheLevel cache.Level, cmdFactory command.Fact
 	return nil
 }
 
-func (c AndroidGradleCacheItemCollector) collectIncludePaths(homeDir, projectDir string, cacheLevel cache.Level) ([]string, error) {
+func collectIncludePaths(homeDir, projectDir string, cacheLevel cache.Level) ([]string, error) {
 	var includePths []string
 
 	lockFilePath := filepath.Join(projectDir, "gradle.deps")
@@ -93,7 +93,7 @@ func (c AndroidGradleCacheItemCollector) collectIncludePaths(homeDir, projectDir
 			return nil
 		}
 
-		unmodified, err := c.prepareUnmodifiedIndicator(path)
+		unmodified, err := prepareUnmodifiedIndicator(path)
 		if err != nil {
 			log.Debugf(err.Error())
 			unmodified = path
@@ -148,21 +148,21 @@ func (c AndroidGradleCacheItemCollector) collectIncludePaths(homeDir, projectDir
 /*
 If the indicator is version controlled in git and has changes, we create a copy of it with its original content.
 */
-func (c AndroidGradleCacheItemCollector) prepareUnmodifiedIndicator(indicator string) (unmodified string, err error) {
+func prepareUnmodifiedIndicator(indicator string) (unmodified string, err error) {
 	indicatorDir := filepath.Dir(indicator)
 	indicatorFile := filepath.Base(indicator)
-	opts := command.Opts{Dir: indicatorDir}
 
-	lsArgs := []string{"ls-files", "--error-unmatch", indicatorFile}
-	lsCmd := c.cmdFactory.Create("git", lsArgs, &opts)
-	code, err := lsCmd.RunAndReturnExitCode()
+	cmd := exec.Command("git", "ls-files", "--error-unmatch", indicatorFile)
+	cmd.Dir = indicatorDir
+	m := command.NewWithCmd(cmd)
+	code, err := m.RunAndReturnExitCode()
 	if code != 0 {
 		return "", fmt.Errorf("%s is not under git version control", indicator)
 	}
-
-	diffArgs := []string{"diff", "-s", "--exit-code", indicatorFile}
-	diffCmd := c.cmdFactory.Create("git", diffArgs, &opts)
-	code, err = diffCmd.RunAndReturnExitCode()
+	cmd = exec.Command("git", "diff", "-s", "--exit-code", indicatorFile)
+	cmd.Dir = indicatorDir
+	m = command.NewWithCmd(cmd)
+	code, err = m.RunAndReturnExitCode()
 	if code == 0 {
 		return "", fmt.Errorf("%s has not modification compared to HEAD", indicator)
 	}
@@ -178,14 +178,10 @@ func (c AndroidGradleCacheItemCollector) prepareUnmodifiedIndicator(indicator st
 		}
 	}()
 
-	showArgs := []string{"show", "HEAD:" + indicatorFile}
-	showOpts := command.Opts{
-		Stdout: file,
-		Stderr: os.Stderr,
-		Dir:    indicatorDir,
-	}
-	showCmd := c.cmdFactory.Create("git", showArgs, &showOpts)
-	code, err = showCmd.RunAndReturnExitCode()
+	cmd = exec.Command("git", "show", "HEAD:"+indicatorFile)
+	cmd.Dir = indicatorDir
+	m = command.NewWithCmd(cmd).SetStdout(file).SetStderr(os.Stderr)
+	code, err = m.RunAndReturnExitCode()
 	if err != nil || code != 0 {
 		return "", err
 	}
@@ -211,7 +207,7 @@ func computeMD5String(filePath string) (string, error) {
 	return fmt.Sprintf("%x", h.Sum(nil)), nil
 }
 
-func (c AndroidGradleCacheItemCollector) collectExcludePaths(homeDir, projectDir string) []string {
+func collectExcludePaths(homeDir, projectDir string) []string {
 	excludePths := []string{
 		"!~/.gradle/daemon/*/daemon-*.out.log", // excludes Gradle daemon logs, like: ~/.gradle/daemon/6.1.1/daemon-3122.out.log
 		"~/.android/build-cache/**",
@@ -229,7 +225,7 @@ func (c AndroidGradleCacheItemCollector) collectExcludePaths(homeDir, projectDir
 		"!*.apk",
 	}
 
-	ver, err := projectGradleVersion(projectDir, c.cmdFactory)
+	ver, err := projectGradleVersion(projectDir)
 	if err != nil {
 		log.Warnf("Failed to get project gradle version: %s", err)
 		return nil

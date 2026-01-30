@@ -38,7 +38,7 @@ func parseGradleVersion(out string) (string, error) {
 	return matches[1], nil
 }
 
-func projectGradleVersion(projectPth string, cmdFactory command.Factory) (string, error) {
+func projectGradleVersion(projectPth string) (string, error) {
 	gradlewPth := filepath.Join(projectPth, "gradlew")
 	exist, err := pathutil.IsPathExists(gradlewPth)
 	if err != nil {
@@ -48,8 +48,8 @@ func projectGradleVersion(projectPth string, cmdFactory command.Factory) (string
 		return "", fmt.Errorf("no gradlew found at: %s", gradlewPth)
 	}
 
-	versionCmdOpts := command.Opts{Dir: filepath.Dir(gradlewPth)}
-	versionCmd := cmdFactory.Create("./gradlew", []string{"-version"}, &versionCmdOpts)
+	versionCmd := command.New("./gradlew", "-version")
+	versionCmd.SetDir(filepath.Dir(gradlewPth))
 	out, err := versionCmd.RunAndReturnTrimmedCombinedOutput()
 	if err != nil {
 		if errorutil.IsExitStatusError(err) {
