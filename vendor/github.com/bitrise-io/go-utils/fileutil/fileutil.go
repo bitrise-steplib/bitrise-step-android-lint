@@ -4,45 +4,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/bitrise-io/go-utils/pathutil"
 	"io/ioutil"
 	"log"
 	"os"
-	"path/filepath"
+
+	"github.com/bitrise-io/go-utils/pathutil"
 )
-
-// FileWriter ...
-type FileWriter interface {
-	Write(path string, value string, mode os.FileMode) error
-}
-
-type defaultFileWriter struct{}
-
-// NewFileWriter ...
-func NewFileWriter() FileWriter {
-	return defaultFileWriter{}
-}
-
-// Write ...
-func (defaultFileWriter) Write(path string, value string, mode os.FileMode) error {
-	if err := ensureSavePath(path); err != nil {
-		return err
-	}
-
-	if err := WriteStringToFile(path, value); err != nil {
-		return err
-	}
-
-	if err := os.Chmod(path, mode); err != nil {
-		return err
-	}
-	return nil
-}
-
-func ensureSavePath(savePath string) error {
-	dirPath := filepath.Dir(savePath)
-	return os.MkdirAll(dirPath, 0700)
-}
 
 // WriteStringToFile ...
 func WriteStringToFile(pth string, fileCont string) error {
