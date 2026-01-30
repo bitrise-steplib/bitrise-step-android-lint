@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"time"
 
@@ -15,7 +16,6 @@ import (
 	"github.com/bitrise-io/go-utils/env"
 	"github.com/bitrise-io/go-utils/log"
 	"github.com/bitrise-io/go-utils/pathutil"
-	"github.com/bitrise-io/go-utils/sliceutil"
 	"github.com/kballard/go-shellquote"
 )
 
@@ -106,7 +106,7 @@ func mainE(config Config, cmdFactory command.Factory, logger log.Logger) error {
 	for module, variants := range variants {
 		logger.Printf("%s:", module)
 		for _, variant := range variants {
-			if sliceutil.IsStringInSlice(variant, filteredVariants[module]) {
+			if slices.Contains(filteredVariants[module], variant) {
 				logger.Donef("✓ %s", strings.TrimSuffix(variant, "UnitTest"))
 				continue
 			}
