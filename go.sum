@@ -1,11 +1,11 @@
-github.com/bitrise-io/go-android v1.0.3 h1:2IpXGpMDZsXIBR7ImsRpYOJA9j01w+zhhzPhC9y2v28=
-github.com/bitrise-io/go-android v1.0.3/go.mod h1:Kzf1+36m0dtIHQ0xFJLRxb3+zfTozjgb2yU8ro+li3o=
+github.com/bitrise-io/go-android v1.0.4-0.20260130132838-ad96d39d30d8 h1:jvW9Z74HIhpbNNt3bEoqC4RB6UdDX2sq8s6EDyF+q6k=
+github.com/bitrise-io/go-android v1.0.4-0.20260130132838-ad96d39d30d8/go.mod h1:Kzf1+36m0dtIHQ0xFJLRxb3+zfTozjgb2yU8ro+li3o=
 github.com/bitrise-io/go-steputils v1.0.1/go.mod h1:YIUaQnIAyK4pCvQG0hYHVkSzKNT9uL2FWmkFNW4mfNI=
 github.com/bitrise-io/go-steputils v1.0.6 h1:eBRL70DWwEd7DWYGd5Ds7OSIY5HElzhoDOI6UuITKQg=
 github.com/bitrise-io/go-steputils v1.0.6/go.mod h1:YIUaQnIAyK4pCvQG0hYHVkSzKNT9uL2FWmkFNW4mfNI=
 github.com/bitrise-io/go-utils v1.0.1/go.mod h1:ZY1DI+fEpZuFpO9szgDeICM4QbqoWVt0RSY3tRI1heY=
-github.com/bitrise-io/go-utils v1.0.15 h1:KRQjNiPrkxBRM6G5fQy05v0p0r8wycWfKVb+Ko+Vtg0=
-github.com/bitrise-io/go-utils v1.0.15/go.mod h1:ZY1DI+fEpZuFpO9szgDeICM4QbqoWVt0RSY3tRI1heY=
+github.com/bitrise-io/go-utils v1.0.13 h1:1QENhTS/JlKH9F7+/nB+TtbTcor6jGrE6cQ4CJWfp5U=
+github.com/bitrise-io/go-utils v1.0.13/go.mod h1:ZY1DI+fEpZuFpO9szgDeICM4QbqoWVt0RSY3tRI1heY=
 github.com/bitrise-io/go-utils/v2 v2.0.0-alpha.30 h1:cnDum7KV3jBUaDtCw3csyKGImKLlOg98Ixb94veSe0c=
 github.com/bitrise-io/go-utils/v2 v2.0.0-alpha.30/go.mod h1:3XUplo0dOWc3DqT2XA2SeHToDSg7+j1y1HTHibT2H68=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
