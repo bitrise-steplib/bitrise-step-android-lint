@@ -7,15 +7,15 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bitrise-io/go-android/cache"
-	"github.com/bitrise-io/go-android/gradle"
+	"github.com/bitrise-io/go-android/v2/cache"
+	"github.com/bitrise-io/go-android/v2/gradle"
 	utilscache "github.com/bitrise-io/go-steputils/cache"
 	"github.com/bitrise-io/go-steputils/stepconf"
-	"github.com/bitrise-io/go-utils/command"
-	"github.com/bitrise-io/go-utils/log"
 	"github.com/bitrise-io/go-utils/pathutil"
 	"github.com/bitrise-io/go-utils/sliceutil"
+	"github.com/bitrise-io/go-utils/v2/command"
 	"github.com/bitrise-io/go-utils/v2/env"
+	"github.com/bitrise-io/go-utils/v2/log"
 	"github.com/kballard/go-shellquote"
 )
 
@@ -30,7 +30,7 @@ type Config struct {
 	DeployDir         string `env:"BITRISE_DEPLOY_DIR,dir"`
 }
 
-var logger = log.NewLogger(false)
+var logger = log.NewLogger(log.WithDebugLog(false))
 
 func getArtifacts(gradleProject gradle.Project, started time.Time, pattern string) (artifacts []gradle.Artifact, err error) {
 	artifacts, err = gradleProject.FindArtifacts(started, pattern, true)
