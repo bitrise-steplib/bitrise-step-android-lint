@@ -2,10 +2,11 @@ package gradle
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
 
-	"github.com/bitrise-io/go-utils/command"
+	"github.com/bitrise-io/go-utils/v2/command"
 )
 
 // Task ...
@@ -16,9 +17,10 @@ type Task struct {
 
 // GetVariants ...
 func (task *Task) GetVariants(args ...string) (Variants, error) {
-	args = append([]string{"tasks", "--all", "--console=plain", "--no-daemon"}, args...)
-	tasksOutput, err := getGradleOutput(task.project.location, args...)
-	fmt.Println(tasksOutput)
+	opts := command.Opts{Dir: task.project.location}
+	args = append([]string{"tasks", "--all", "--console=plain", "--quiet"}, args...)
+	cmd := task.project.cmdFactory.Create(filepath.Join(task.project.location, "gradlew"), args, &opts)
+	tasksOutput, err := cmd.RunAndReturnTrimmedCombinedOutput()
 	if err != nil {
 		return nil, fmt.Errorf("%s, %s", tasksOutput, err)
 	}
@@ -26,8 +28,8 @@ func (task *Task) GetVariants(args ...string) (Variants, error) {
 }
 
 func (task *Task) parseVariants(gradleOutput string) Variants {
-	// example gradleOutput:
-	// "
+	//example gradleOutput:
+	//"
 	// lintMyflavorokStaging - Runs lint on the MyflavorokStaging build.
 	// lintMyflavorRelease - Runs lint on the MyflavorRelease build.
 	// lintVitalMyflavorRelease - Runs lint on the MyflavorRelease build.
@@ -86,13 +88,17 @@ func cleanModuleName(s string) string {
 }
 
 // GetCommand ...
-func (task *Task) GetCommand(v Variants, args ...string) *command.Model {
+func (task *Task) GetCommand(v Variants, args ...string) command.Command {
 	var a []string
 	for module, variants := range v {
 		for _, variant := range variants {
 			a = append(a, cleanModuleName(module)+task.name+variant)
 		}
 	}
-	return command.NewWithStandardOuts(filepath.Join(task.project.location, "gradlew"), append(a, args...)...).
-		SetDir(task.project.location)
+	cmdOpts := command.Opts{
+		Dir:    task.project.location,
+		Stdout: os.Stdout,
+		Stderr: os.Stderr,
+	}
+	return task.project.cmdFactory.Create(filepath.Join(task.project.location, "gradlew"), append(a, args...), &cmdOpts)
 }

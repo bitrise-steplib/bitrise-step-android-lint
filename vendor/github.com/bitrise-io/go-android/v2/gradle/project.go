@@ -2,7 +2,6 @@ package gradle
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -10,17 +9,19 @@ import (
 
 	"github.com/bitrise-io/go-utils/log"
 	"github.com/bitrise-io/go-utils/pathutil"
-	glob "github.com/ryanuber/go-glob"
+	"github.com/bitrise-io/go-utils/v2/command"
+	"github.com/ryanuber/go-glob"
 )
 
 // Project ...
 type Project struct {
-	location string
-	monoRepo bool
+	location   string
+	monoRepo   bool
+	cmdFactory command.Factory
 }
 
 // NewProject ...
-func NewProject(location string) (Project, error) {
+func NewProject(location string, cmdFactory command.Factory) (Project, error) {
 	var err error
 	location, err = filepath.Abs(location)
 	if err != nil {
@@ -42,22 +43,22 @@ func NewProject(location string) (Project, error) {
 	}
 
 	if location == "/" {
-		return Project{location: location, monoRepo: false}, nil
+		return Project{location: location, monoRepo: false, cmdFactory: cmdFactory}, nil
 	}
 
 	root := filepath.Join(location, "..")
 
-	files, err := ioutil.ReadDir(root)
+	entries, err := os.ReadDir(root)
 	if err != nil {
-		return Project{}, err
+		return Project{}, fmt.Errorf("failed to read entries of %s: %w", root, err)
 	}
 
 	projectsCount := 0
-	for _, file := range files {
-		if file.IsDir() {
-			if buildGradleExists, err := pathutil.IsPathExists(filepath.Join(root, file.Name(), "build.gradle")); err != nil {
+	for _, entry := range entries {
+		if entry.IsDir() {
+			if buildGradleExists, err := pathutil.IsPathExists(filepath.Join(root, entry.Name(), "build.gradle")); err != nil {
 				return Project{}, err
-			} else if buildGradleKtsExists, err := pathutil.IsPathExists(filepath.Join(root, file.Name(), "build.gradle.kts")); err != nil {
+			} else if buildGradleKtsExists, err := pathutil.IsPathExists(filepath.Join(root, entry.Name(), "build.gradle.kts")); err != nil {
 				return Project{}, err
 			} else if buildGradleExists || buildGradleKtsExists {
 				projectsCount++
@@ -65,7 +66,7 @@ func NewProject(location string) (Project, error) {
 		}
 	}
 
-	return Project{location: location, monoRepo: (projectsCount > 1)}, nil
+	return Project{location: location, monoRepo: projectsCount > 1, cmdFactory: cmdFactory}, nil
 }
 
 // GetTask ...

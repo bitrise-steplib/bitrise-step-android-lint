@@ -2,14 +2,14 @@ package cache
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
 
-	"github.com/bitrise-io/go-utils/command"
 	"github.com/bitrise-io/go-utils/errorutil"
 	"github.com/bitrise-io/go-utils/pathutil"
+	"github.com/bitrise-io/go-utils/v2/command"
 	"github.com/hashicorp/go-version"
 )
 
@@ -38,7 +38,7 @@ func parseGradleVersion(out string) (string, error) {
 	return matches[1], nil
 }
 
-func projectGradleVersion(projectPth string) (string, error) {
+func projectGradleVersion(projectPth string, cmdFactory command.Factory) (string, error) {
 	gradlewPth := filepath.Join(projectPth, "gradlew")
 	exist, err := pathutil.IsPathExists(gradlewPth)
 	if err != nil {
@@ -48,8 +48,8 @@ func projectGradleVersion(projectPth string) (string, error) {
 		return "", fmt.Errorf("no gradlew found at: %s", gradlewPth)
 	}
 
-	versionCmd := command.New("./gradlew", "-version")
-	versionCmd.SetDir(filepath.Dir(gradlewPth))
+	versionCmdOpts := command.Opts{Dir: filepath.Dir(gradlewPth)}
+	versionCmd := cmdFactory.Create("./gradlew", []string{"-version"}, &versionCmdOpts)
 	out, err := versionCmd.RunAndReturnTrimmedCombinedOutput()
 	if err != nil {
 		if errorutil.IsExitStatusError(err) {
@@ -67,7 +67,7 @@ func gradleUserHomeExcludePaths(gradleUserHome, currentGradleVersion string) ([]
 	{
 		// exclude old wrappers, like ~/.gradle/wrapper/dists/gradle-5.1.1-all
 		wrapperDistrDir := filepath.Join(gradleUserHome, "wrapper", "dists")
-		entries, err := ioutil.ReadDir(wrapperDistrDir)
+		entries, err := os.ReadDir(wrapperDistrDir)
 		if err != nil {
 			return nil, fmt.Errorf("failed to read entries of %s: %s", wrapperDistrDir, err)
 		}
@@ -81,7 +81,7 @@ func gradleUserHomeExcludePaths(gradleUserHome, currentGradleVersion string) ([]
 	{
 		// exclude old caches, like ~/.gradle/caches/5.1.1
 		cachesDir := filepath.Join(gradleUserHome, "caches")
-		entries, err := ioutil.ReadDir(cachesDir)
+		entries, err := os.ReadDir(cachesDir)
 		if err != nil {
 			return nil, fmt.Errorf("failed to read entries of %s: %s", cachesDir, err)
 		}
@@ -100,7 +100,7 @@ func gradleUserHomeExcludePaths(gradleUserHome, currentGradleVersion string) ([]
 	{
 		// exclude old daemon, like ~/.gradle/daemon/5.1.1
 		daemonDir := filepath.Join(gradleUserHome, "daemon")
-		entries, err := ioutil.ReadDir(daemonDir)
+		entries, err := os.ReadDir(daemonDir)
 		if err != nil {
 			return nil, fmt.Errorf("failed to read entries of %s: %s", daemonDir, err)
 		}
@@ -123,7 +123,7 @@ func projectGradleExcludePaths(projectDir, currentGradleVersion string) ([]strin
 	var excludes []string
 
 	gradleDir := filepath.Join(projectDir, ".gradle")
-	entries, err := ioutil.ReadDir(gradleDir)
+	entries, err := os.ReadDir(gradleDir)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read entries of %s: %s", gradleDir, err)
 	}
