@@ -3,7 +3,7 @@ module github.com/bitrise-steplib/bitrise-step-android-lint
 go 1.22
 
 require (
-	github.com/bitrise-io/go-android/v2 v2.0.0-alpha.11.0.20260130110902-fffcf42ff4e9
+	github.com/bitrise-io/go-android/v2 v2.0.0-alpha.11.0.20260202103725-59f0caadab0f
 	github.com/bitrise-io/go-steputils v1.0.6
 	github.com/bitrise-io/go-utils v1.0.15
 	github.com/bitrise-io/go-utils/v2 v2.0.0-alpha.31
