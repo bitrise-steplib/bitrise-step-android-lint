@@ -4,16 +4,15 @@ import (
 	"crypto/md5"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/bitrise-io/go-steputils/cache"
-	"github.com/bitrise-io/go-utils/command"
 	"github.com/bitrise-io/go-utils/fileutil"
 	"github.com/bitrise-io/go-utils/log"
 	"github.com/bitrise-io/go-utils/pathutil"
+	"github.com/bitrise-io/go-utils/v2/command"
 )
 
 // AndroidGradleCacheItemCollector ...
@@ -167,7 +166,7 @@ func (c AndroidGradleCacheItemCollector) prepareUnmodifiedIndicator(indicator st
 		return "", fmt.Errorf("%s has not modification compared to HEAD", indicator)
 	}
 
-	file, err := ioutil.TempFile(os.TempDir(), "indicator")
+	file, err := os.CreateTemp("", "indicator")
 	if err != nil {
 		return "", err
 	}

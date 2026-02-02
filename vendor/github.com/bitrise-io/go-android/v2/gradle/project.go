@@ -2,8 +2,6 @@ package gradle
 
 import (
 	"fmt"
-	"github.com/bitrise-io/go-utils/command"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -11,7 +9,8 @@ import (
 
 	"github.com/bitrise-io/go-utils/log"
 	"github.com/bitrise-io/go-utils/pathutil"
-	glob "github.com/ryanuber/go-glob"
+	"github.com/bitrise-io/go-utils/v2/command"
+	"github.com/ryanuber/go-glob"
 )
 
 // Project ...
@@ -49,17 +48,17 @@ func NewProject(location string, cmdFactory command.Factory) (Project, error) {
 
 	root := filepath.Join(location, "..")
 
-	files, err := ioutil.ReadDir(root)
+	entries, err := os.ReadDir(root)
 	if err != nil {
-		return Project{}, err
+		return Project{}, fmt.Errorf("failed to read entries of %s: %w", root, err)
 	}
 
 	projectsCount := 0
-	for _, file := range files {
-		if file.IsDir() {
-			if buildGradleExists, err := pathutil.IsPathExists(filepath.Join(root, file.Name(), "build.gradle")); err != nil {
+	for _, entry := range entries {
+		if entry.IsDir() {
+			if buildGradleExists, err := pathutil.IsPathExists(filepath.Join(root, entry.Name(), "build.gradle")); err != nil {
 				return Project{}, err
-			} else if buildGradleKtsExists, err := pathutil.IsPathExists(filepath.Join(root, file.Name(), "build.gradle.kts")); err != nil {
+			} else if buildGradleKtsExists, err := pathutil.IsPathExists(filepath.Join(root, entry.Name(), "build.gradle.kts")); err != nil {
 				return Project{}, err
 			} else if buildGradleExists || buildGradleKtsExists {
 				projectsCount++
@@ -87,7 +86,12 @@ func (proj Project) FindArtifacts(generatedAfter time.Time, pattern string, incl
 			return nil
 		}
 
-		if info.ModTime().Before(generatedAfter) || info.IsDir() || !glob.Glob(pattern, path) {
+		if info.IsDir() || !glob.Glob(pattern, path) {
+			return nil
+		}
+
+		if info.ModTime().Before(generatedAfter) {
+			log.Warnf("Ignoring %s because it was created by a previous step based on the file modification time", info.Name())
 			return nil
 		}
 
