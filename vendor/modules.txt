@@ -1,4 +1,4 @@
-# github.com/bitrise-io/go-android/v2 v2.0.0-alpha.12
+# github.com/bitrise-io/go-android/v2 v2.0.0-alpha.13.0.20260226142620-c24337e60d9a
 ## explicit; go 1.22
 github.com/bitrise-io/go-android/v2/cache
 github.com/bitrise-io/go-android/v2/gradle

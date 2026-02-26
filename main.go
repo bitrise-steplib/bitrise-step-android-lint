@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"time"
 
@@ -12,7 +13,6 @@ import (
 	utilscache "github.com/bitrise-io/go-steputils/cache"
 	"github.com/bitrise-io/go-steputils/stepconf"
 	"github.com/bitrise-io/go-utils/pathutil"
-	"github.com/bitrise-io/go-utils/sliceutil"
 	"github.com/bitrise-io/go-utils/v2/command"
 	"github.com/bitrise-io/go-utils/v2/env"
 	"github.com/bitrise-io/go-utils/v2/log"
@@ -78,35 +78,37 @@ func filterVariants(module, variant string, variantsMap gradle.Variants) (gradle
 }
 
 func mainE(config Config, cmdFactory command.Factory, logger log.Logger) error {
-	gradleProject, err := gradle.NewProject(config.ProjectLocation, cmdFactory)
+	gradleProject, err := gradle.NewProject(config.ProjectLocation, cmdFactory, logger)
 	if err != nil {
-		return fmt.Errorf("Process config: failed to open project, error: %s", err)
+		return fmt.Errorf("Process config: failed to open project: %s", err)
 	}
 
 	lintTask := gradleProject.GetTask("lint")
 
 	args, err := shellquote.Split(config.Arguments)
 	if err != nil {
-		return fmt.Errorf("Process config: failed to parse arguments, error: %s", err)
+		return fmt.Errorf("Process config: failed to parse arguments: %s", err)
 	}
 
 	logger.Infof("Variants:")
 	fmt.Println()
 
+	logger.Errorf("args %v", args)
 	variants, err := lintTask.GetVariants(args...)
 	if err != nil {
-		return fmt.Errorf("Run: failed to fetch variants, error: %s", err)
+		return fmt.Errorf("Run: failed to fetch variants: %s", err)
 	}
+	logger.Errorf("args %v", args)
 
 	filteredVariants, err := filterVariants(config.Module, config.Variant, variants)
 	if err != nil {
-		failf("Process config: failed to find buildable variants, error: %s", err)
+		failf("Process config: failed to find buildable variants: %s", err)
 	}
 
 	for module, variants := range variants {
 		logger.Printf("%s:", module)
 		for _, variant := range variants {
-			if sliceutil.IsStringInSlice(variant, filteredVariants[module]) {
+			if slices.Contains(filteredVariants[module], variant) {
 				logger.Donef("✓ %s", strings.TrimSuffix(variant, "UnitTest"))
 				continue
 			}
@@ -126,7 +128,7 @@ func mainE(config Config, cmdFactory command.Factory, logger log.Logger) error {
 
 	taskError := lintCommand.Run()
 	if taskError != nil {
-		logger.Errorf("Run: lint task failed, error: %v", taskError)
+		logger.Errorf("Run: lint task failed: %v", taskError)
 	}
 	fmt.Println()
 
@@ -135,7 +137,7 @@ func mainE(config Config, cmdFactory command.Factory, logger log.Logger) error {
 
 	artifacts, err := getArtifacts(gradleProject, started, config.ReportPathPattern)
 	if err != nil {
-		return fmt.Errorf("Export outputs: failed to find artifacts, error: %v", err)
+		return fmt.Errorf("Export outputs: failed to find artifacts: %v", err)
 	}
 
 	if len(artifacts) > 0 {
@@ -144,7 +146,7 @@ func mainE(config Config, cmdFactory command.Factory, logger log.Logger) error {
 				filepath.Join(config.DeployDir, artifact.Name),
 			)
 			if err != nil {
-				return fmt.Errorf("Export outputs: failed to check path, error: %v", err)
+				return fmt.Errorf("Export outputs: failed to check path: %v", err)
 			}
 
 			artifactName := filepath.Base(artifact.Path)
