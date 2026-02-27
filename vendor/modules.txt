@@ -1,4 +1,4 @@
-# github.com/bitrise-io/go-android/v2 v2.0.0-alpha.13.0.20260226142620-c24337e60d9a
+# github.com/bitrise-io/go-android/v2 v2.0.0-alpha.14
 ## explicit; go 1.22
 github.com/bitrise-io/go-android/v2/cache
 github.com/bitrise-io/go-android/v2/gradle
@@ -17,9 +17,8 @@ github.com/bitrise-io/go-utils/log
 github.com/bitrise-io/go-utils/parseutil
 github.com/bitrise-io/go-utils/pathutil
 github.com/bitrise-io/go-utils/pointers
-github.com/bitrise-io/go-utils/sliceutil
 github.com/bitrise-io/go-utils/ziputil
-# github.com/bitrise-io/go-utils/v2 v2.0.0-alpha.30
+# github.com/bitrise-io/go-utils/v2 v2.0.0-alpha.33
 ## explicit; go 1.17
 github.com/bitrise-io/go-utils/v2/command
 github.com/bitrise-io/go-utils/v2/env
