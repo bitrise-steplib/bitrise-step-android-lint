@@ -93,12 +93,10 @@ func mainE(config Config, cmdFactory command.Factory, logger log.Logger) error {
 	logger.Infof("Variants:")
 	fmt.Println()
 
-	logger.Errorf("args %v", args)
 	variants, err := lintTask.GetVariants(args...)
 	if err != nil {
 		return fmt.Errorf("Run: failed to fetch variants: %s", err)
 	}
-	logger.Errorf("args %v", args)
 
 	filteredVariants, err := filterVariants(config.Module, config.Variant, variants)
 	if err != nil {
