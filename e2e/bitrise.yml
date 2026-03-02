@@ -40,7 +40,9 @@ workflows:
     - path::./:
         title: Test simple android project
         inputs:
-        - arguments: --info
+        - arguments: --debug
+        - module: app
+        - variant: Debug
     - change-workdir:
         title: cd $ORIG_BITRISE_SOURCE_DIR/_tmp/mono_repo
         run_if: true
