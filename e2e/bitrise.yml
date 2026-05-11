@@ -60,29 +60,6 @@ workflows:
         inputs:
         - path: $ORIG_BITRISE_SOURCE_DIR/_tmp/mono_repo/ui/espresso/IdlingResourceSample
         - is_create_path: true
-    - script:
-        title: Bump gradle wrapper for mirrors-plugin compatibility
-        inputs:
-        - content: |-
-            #!/usr/bin/env bash
-            set -euxo pipefail
-            # The Bitrise gradle mirrors init script (injected by
-            # install-missing-android-tools above) calls
-            # `getDependencyResolutionManagement()`, a gradle 6.8+ API.
-            # The IdlingResourceSample fixture ships gradle 6.5.1, which
-            # fails the init script's Kotlin compilation. Bump the
-            # wrapper properties file in place (no gradle invocation
-            # needed) so the next ./gradlew run downloads a compatible
-            # distribution. Picked 7.6.4 — last 7.x patch, plenty of
-            # headroom for the gradle 6.8+ API requirement without
-            # jumping to a major version that might break the fixture.
-            wrapper_props=gradle/wrapper/gradle-wrapper.properties
-            sed -i.bak \
-              's|gradle-[0-9][0-9.]*-all\.zip|gradle-7.6.4-all.zip|' \
-              "$wrapper_props"
-            rm -f "${wrapper_props}.bak"
-            echo "Updated wrapper properties:"
-            cat "$wrapper_props"
     - path::./:
         title: Test monorepo
     - path::./:
