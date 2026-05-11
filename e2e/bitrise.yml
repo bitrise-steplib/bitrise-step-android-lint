@@ -60,6 +60,20 @@ workflows:
         inputs:
         - path: $ORIG_BITRISE_SOURCE_DIR/_tmp/mono_repo/ui/espresso/IdlingResourceSample
         - is_create_path: true
+    - script:
+        title: Drop gradle mirrors init script (incompatible with gradle 6.5.1 fixture)
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+            # The Bitrise gradle mirrors init script (injected by
+            # install-missing-android-tools above) uses
+            # `getDependencyResolutionManagement()`, a gradle 6.8+ API.
+            # The IdlingResourceSample subproject below ships gradle
+            # 6.5.1 and fails the init script's Kotlin compilation.
+            # Drop the init script for this leg of the e2e so the
+            # gradle 6.5.1 build runs without the mirror plugin.
+            rm -f "$HOME/.gradle/init.d/bitrise-gradle-mirrors.init.gradle.kts"
+            echo "Removed mirror init script (if any)"
     - path::./:
         title: Test monorepo
     - path::./:
