@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -8,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/bitrise-io/bitrise-build-cache-cli/v2/pkg/reactnative/wrap"
 	"github.com/bitrise-io/go-android/v2/cache"
 	"github.com/bitrise-io/go-android/v2/gradle"
 	utilscache "github.com/bitrise-io/go-steputils/cache"
@@ -118,7 +120,39 @@ func mainE(config Config, cmdFactory command.Factory, logger log.Logger) error {
 	started := time.Now()
 
 	logger.Infof("Run lint:")
-	lintCommand := lintTask.GetCommand(filteredVariants, args...)
+
+	// Inline of lintTask.GetCommand(filteredVariants, args...) so the gradlew
+	// path and argv are explicit — needed to route the invocation through
+	// `bitrise-build-cache react-native run -- ...` when RN cache is active.
+	// Resolve gradlew to an absolute path: the command also sets Dir to the
+	// project location, and a relative gradlew name (e.g. "_tmp/gradlew")
+	// gets re-resolved relative to that Dir at exec time, producing
+	// "_tmp/_tmp/gradlew" and an ENOENT.
+	gradlewPath, err := filepath.Abs(filepath.Join(config.ProjectLocation, "gradlew"))
+	if err != nil {
+		return fmt.Errorf("resolve gradlew path: %v", err)
+	}
+	var taskNames []string
+	for module, variants := range filteredVariants {
+		modulePrefix := ""
+		if module != "" {
+			modulePrefix = ":" + module + ":"
+		}
+		for _, variant := range variants {
+			taskNames = append(taskNames, modulePrefix+"lint"+variant)
+		}
+	}
+	gradleArgs := append(taskNames, args...)
+	det := wrap.Detect(context.Background(), wrap.DetectParams{Logger: logger})
+	if det.ReactNativeEnabled {
+		logger.Infof("Bitrise Build Cache: React Native cache active — wrapping gradle with %s", det.CLIPath)
+	}
+	name, wrappedArgs := wrap.Wrap(det, gradlewPath, gradleArgs)
+	lintCommand := cmdFactory.Create(name, wrappedArgs, &command.Opts{
+		Dir:    config.ProjectLocation,
+		Stdout: os.Stdout,
+		Stderr: os.Stderr,
+	})
 
 	fmt.Println()
 	logger.Donef("$ " + lintCommand.PrintableCommandArgs())
