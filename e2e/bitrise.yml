@@ -54,14 +54,6 @@ workflows:
         - content: |
             #!/bin/bash
             git clone $MONO_REPO_GIT_CLONE_URL .
-    - script:
-        title: Bump legacy gradle-6.8.3 wrappers to 7.6.4
-        inputs:
-        - content: |
-            #!/bin/bash
-            set -e
-            find . -name gradle-wrapper.properties -exec sed -i.bak 's|gradle-6\.8\.3-all|gradle-7.6.4-all|g' {} +
-            find . -name '*.bak' -delete
     - change-workdir:
         title: cd $ORIG_BITRISE_SOURCE_DIR/_tmp/mono_repo/ui/espresso/IdlingResourceSample
         run_if: true
