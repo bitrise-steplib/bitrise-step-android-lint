@@ -51,39 +51,7 @@ workflows:
     - script:
         title: Scaffold minimal android project + wrapper
         inputs:
-        - content: |
-            #!/bin/bash
-            set -euo pipefail
-            mkdir -p app/src/main/res/values
-            cat > settings.gradle <<'EOF'
-            rootProject.name = 'nested-fixture'
-            include ':app'
-            EOF
-            cat > build.gradle <<'EOF'
-            buildscript {
-                repositories { google(); mavenCentral() }
-                dependencies { classpath 'com.android.tools.build:gradle:7.4.2' }
-            }
-            allprojects { repositories { google(); mavenCentral() } }
-            EOF
-            cat > app/build.gradle <<'EOF'
-            apply plugin: 'com.android.application'
-            android {
-                namespace 'com.example.fixture'
-                compileSdk 34
-                defaultConfig { applicationId 'com.example.fixture'; minSdk 24 }
-            }
-            EOF
-            cat > app/src/main/AndroidManifest.xml <<'EOF'
-            <?xml version="1.0" encoding="utf-8"?>
-            <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-                <application android:label="fixture"/>
-            </manifest>
-            EOF
-            cat > app/src/main/res/values/strings.xml <<'EOF'
-            <resources><string name="app_name">fixture</string></resources>
-            EOF
-            gradle wrapper --gradle-version 7.6.4 --distribution-type all
+        - content: bash "$ORIG_BITRISE_SOURCE_DIR/scripts/scaffold-android-fixture.sh"
     - install-missing-android-tools:
         inputs:
         - gradlew_path: ./gradlew

@@ -1,0 +1,10 @@
+apply plugin: 'com.android.application'
+
+android {
+    namespace 'com.example.fixture'
+    compileSdk 34
+    defaultConfig {
+        applicationId 'com.example.fixture'
+        minSdk 24
+    }
+}
