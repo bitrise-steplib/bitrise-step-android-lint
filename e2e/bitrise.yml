@@ -7,12 +7,11 @@ app:
   - BITRISE_STEP_GIT_CLONE_URL: https://github.com/bitrise-steplib/bitrise-step-android-lint.git
   - MY_STEPLIB_REPO_FORK_GIT_URL: $MY_STEPLIB_REPO_FORK_GIT_URL
   - SIMPLE_REPO_GIT_CLONE_URL: https://github.com/bitrise-samples/android-multiple-test-results-sample.git
-  - MONO_REPO_GIT_CLONE_URL: https://github.com/bitrise-samples/android-testing.git
   - JDK_VERSION: "11"
 
 workflows:
-  test_simple-and-mono-repo-in-src-dir:
-    title: Test simple android project & mono repo projects in source dir
+  test_simple-and-scaffolded-nested:
+    title: Test simple android project & scaffolded nested project
     steps:
     - script:
         inputs:
@@ -44,26 +43,22 @@ workflows:
         - module: app
         - variant: Debug
     - change-workdir:
-        title: cd $ORIG_BITRISE_SOURCE_DIR/_tmp/mono_repo
+        title: cd $ORIG_BITRISE_SOURCE_DIR/_tmp/nested/deep/subdir
         run_if: true
         inputs:
-        - path: $ORIG_BITRISE_SOURCE_DIR/_tmp/mono_repo
+        - path: $ORIG_BITRISE_SOURCE_DIR/_tmp/nested/deep/subdir
         - is_create_path: true
     - script:
+        title: Scaffold minimal android project + wrapper
         inputs:
-        - content: |
-            #!/bin/bash
-            git clone $MONO_REPO_GIT_CLONE_URL .
-    - change-workdir:
-        title: cd $ORIG_BITRISE_SOURCE_DIR/_tmp/mono_repo/ui/espresso/IdlingResourceSample
-        run_if: true
+        - content: bash "$ORIG_BITRISE_SOURCE_DIR/scripts/scaffold-android-fixture.sh"
+    - install-missing-android-tools:
         inputs:
-        - path: $ORIG_BITRISE_SOURCE_DIR/_tmp/mono_repo/ui/espresso/IdlingResourceSample
-        - is_create_path: true
+        - gradlew_path: ./gradlew
     - path::./:
-        title: Test monorepo
+        title: Test scaffolded nested project (defaults)
     - path::./:
-        title: Test monorepo with module and variant set
+        title: Test scaffolded nested project (module + variant)
         inputs:
         - module: app
         - variant: Debug

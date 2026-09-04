@@ -13,11 +13,11 @@ import (
 	"github.com/bitrise-io/go-android/v2/cache"
 	"github.com/bitrise-io/go-android/v2/gradle"
 	utilscache "github.com/bitrise-io/go-steputils/cache"
-	"github.com/bitrise-io/go-steputils/stepconf"
-	"github.com/bitrise-io/go-utils/pathutil"
+	"github.com/bitrise-io/go-steputils/v2/stepconf"
 	"github.com/bitrise-io/go-utils/v2/command"
 	"github.com/bitrise-io/go-utils/v2/env"
 	"github.com/bitrise-io/go-utils/v2/log"
+	"github.com/bitrise-io/go-utils/v2/pathutil"
 	"github.com/kballard/go-shellquote"
 )
 
@@ -32,9 +32,7 @@ type Config struct {
 	DeployDir         string `env:"BITRISE_DEPLOY_DIR,dir"`
 }
 
-var logger = log.NewLogger(log.WithDebugLog(false))
-
-func getArtifacts(gradleProject gradle.Project, started time.Time, pattern string) (artifacts []gradle.Artifact, err error) {
+func getArtifacts(gradleProject gradle.Project, started time.Time, pattern string, logger log.Logger) (artifacts []gradle.Artifact, err error) {
 	artifacts, err = gradleProject.FindArtifacts(started, pattern, true)
 	if err != nil {
 		return
@@ -44,11 +42,13 @@ func getArtifacts(gradleProject gradle.Project, started time.Time, pattern strin
 			logger.Warnf("No artifacts found with pattern: %s that has modification time after: %s", pattern, started)
 			logger.Warnf("Retrying without modtime check....")
 			logger.Println()
-			return getArtifacts(gradleProject, time.Time{}, pattern)
+
+			return getArtifacts(gradleProject, time.Time{}, pattern, logger)
 		}
 		logger.Warnf("No artifacts found with pattern: %s without modtime check", pattern)
 		logger.Warnf("If you have changed default report export path in your gradle files then you might need to change ReportPathPattern accordingly.")
 	}
+
 	return
 }
 
@@ -79,7 +79,7 @@ func filterVariants(module, variant string, variantsMap gradle.Variants) (gradle
 	return filteredVariants, nil
 }
 
-func mainE(config Config, cmdFactory command.Factory, logger log.Logger) error {
+func mainE(config Config, cmdFactory command.Factory, pathChecker pathutil.PathChecker, logger log.Logger) error {
 	gradleProject, err := gradle.NewProject(config.ProjectLocation, cmdFactory, logger)
 	if err != nil {
 		return fmt.Errorf("Process config: failed to open project: %s", err)
@@ -102,7 +102,7 @@ func mainE(config Config, cmdFactory command.Factory, logger log.Logger) error {
 
 	filteredVariants, err := filterVariants(config.Module, config.Variant, variants)
 	if err != nil {
-		failf("Process config: failed to find buildable variants: %s", err)
+		return fmt.Errorf("Process config: failed to find buildable variants: %s", err)
 	}
 
 	for module, variants := range variants {
@@ -167,14 +167,14 @@ func mainE(config Config, cmdFactory command.Factory, logger log.Logger) error {
 	logger.Infof("Exporting artifacts:")
 	fmt.Println()
 
-	artifacts, err := getArtifacts(gradleProject, started, config.ReportPathPattern)
+	artifacts, err := getArtifacts(gradleProject, started, config.ReportPathPattern, logger)
 	if err != nil {
 		return fmt.Errorf("Export outputs: failed to find artifacts: %v", err)
 	}
 
 	if len(artifacts) > 0 {
 		for _, artifact := range artifacts {
-			exists, err := pathutil.IsPathExists(
+			exists, err := pathChecker.IsPathExists(
 				filepath.Join(config.DeployDir, artifact.Name),
 			)
 			if err != nil {
@@ -206,25 +206,27 @@ func mainE(config Config, cmdFactory command.Factory, logger log.Logger) error {
 	return taskError
 }
 
-func failf(f string, args ...interface{}) {
+func failf(logger log.Logger, f string, args ...interface{}) {
 	logger.Errorf(f, args...)
 	os.Exit(1)
 }
 
 func main() {
-	var config Config
+	logger := log.NewLogger(log.WithDebugLog(false))
+	envRepo := env.NewRepository()
+	cmdFactory := command.NewFactory(envRepo)
+	pathChecker := pathutil.NewPathChecker()
 
-	if err := stepconf.Parse(&config); err != nil {
-		failf("Process config: couldn't create step config: %v\n", err)
+	var config Config
+	if err := stepconf.NewInputParser(envRepo).Parse(&config); err != nil {
+		failf(logger, "Process config: couldn't create step config: %v\n", err)
 	}
 
 	stepconf.Print(config)
 	fmt.Println()
 
-	cmdFactory := command.NewFactory(env.NewRepository())
-
-	if err := mainE(config, cmdFactory, logger); err != nil {
-		failf("%s", err)
+	if err := mainE(config, cmdFactory, pathChecker, logger); err != nil {
+		failf(logger, "%s", err)
 	}
 
 	fmt.Println()
