@@ -16,8 +16,7 @@ It highlights the code line where the error is found, explains the type of error
 
 Optionally, you can modify these inputs:
 1. You can specify where the Lint reports should be found once the Step has run if you overwrite the **Report location pattern** input.
-2. You can set if the Step should cache build outputs and dependencies, only the dependencies or nothing at all in the **Set level of cache** input.
-3. You can set any gradle argument to the gradle task in the **Additional Gradle Arguments** input.
+2. You can set any gradle argument to the gradle task in the **Additional Gradle Arguments** input.
 
 ### Troubleshooting
 Make sure you insert the Step before a build Step.
@@ -49,7 +48,6 @@ You can also run this step directly with [Bitrise CLI](https://github.com/bitris
 | `module` | Set the module that you want to lint. To see your available modules please open your project in Android Studio and go in [Project Structure] and see the list on the left.  |  |  |
 | `variant` | Set the variant that you want to lint. To see your available variants please open your project in Android Studio and go in [Project Structure] -> variants section.  |  |  |
 | `report_path_pattern` | Will find the report file with the given pattern. If you need the xml file then you can use: "*/build/reports/lint-results*.xml"  | required | `*/build/reports/lint-results*.html` |
-| `cache_level` | `all` - will cache build cache and dependencies `only_deps` - will cache dependencies only `none` - will not cache anything | required | `only_deps` |
 | `arguments` | Extra arguments passed to the gradle task |  |  |
 </details>
 

@@ -10,9 +10,7 @@ import (
 	"time"
 
 	"github.com/bitrise-io/bitrise-build-cache-cli/v2/pkg/reactnative/wrap"
-	"github.com/bitrise-io/go-android/v2/cache"
 	"github.com/bitrise-io/go-android/v2/gradle"
-	utilscache "github.com/bitrise-io/go-steputils/cache"
 	"github.com/bitrise-io/go-steputils/v2/stepconf"
 	"github.com/bitrise-io/go-utils/v2/command"
 	"github.com/bitrise-io/go-utils/v2/env"
@@ -28,7 +26,6 @@ type Config struct {
 	Variant           string `env:"variant"`
 	Module            string `env:"module"`
 	Arguments         string `env:"arguments"`
-	CacheLevel        string `env:"cache_level,opt[none,only_deps,all]"`
 	DeployDir         string `env:"BITRISE_DEPLOY_DIR,dir"`
 }
 
@@ -228,11 +225,4 @@ func main() {
 	if err := mainE(config, cmdFactory, pathChecker, logger); err != nil {
 		failf(logger, "%s", err)
 	}
-
-	fmt.Println()
-	logger.Infof("Collecting cache:")
-	if warning := cache.Collect(config.ProjectLocation, utilscache.Level(config.CacheLevel), cmdFactory); warning != nil {
-		logger.Warnf("%s", warning)
-	}
-	logger.Donef("  Done")
 }

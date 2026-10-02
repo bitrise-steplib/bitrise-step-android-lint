@@ -11,8 +11,7 @@ description: |-
 
   Optionally, you can modify these inputs:
   1. You can specify where the Lint reports should be found once the Step has run if you overwrite the **Report location pattern** input.
-  2. You can set if the Step should cache build outputs and dependencies, only the dependencies or nothing at all in the **Set level of cache** input.
-  3. You can set any gradle argument to the gradle task in the **Additional Gradle Arguments** input.
+  2. You can set any gradle argument to the gradle task in the **Additional Gradle Arguments** input.
 
   ### Troubleshooting
   Make sure you insert the Step before a build Step.
@@ -83,19 +82,6 @@ inputs:
     description: |
       Will find the report file with the given pattern. If you need the xml file then you can use: "*/build/reports/lint-results*.xml"
     is_required: true
-- cache_level: only_deps
-  opts:
-    category: Options
-    title: Set the level of cache
-    description: |-
-      `all` - will cache build cache and dependencies
-      `only_deps` - will cache dependencies only
-      `none` - will not cache anything
-    is_required: true
-    value_options:
-    - all
-    - only_deps
-    - none
 - arguments:
   opts:
     category: Options

@@ -13,22 +13,13 @@ github.com/bitrise-io/bitrise-build-cache-cli/v2/pkg/reactnative/wrap
 github.com/bitrise-io/bitrise-build-cache-cli/v2/pkg/status
 # github.com/bitrise-io/go-android/v2 v2.0.0-alpha.14
 ## explicit; go 1.22
-github.com/bitrise-io/go-android/v2/cache
 github.com/bitrise-io/go-android/v2/gradle
-# github.com/bitrise-io/go-steputils v1.0.6
-## explicit; go 1.15
-github.com/bitrise-io/go-steputils/cache
-github.com/bitrise-io/go-steputils/tools
 # github.com/bitrise-io/go-steputils/v2 v2.0.0-alpha.50
 ## explicit; go 1.21
 github.com/bitrise-io/go-steputils/v2/stepconf
 # github.com/bitrise-io/go-utils v1.0.15
 ## explicit; go 1.13
-github.com/bitrise-io/go-utils/colorstring
 github.com/bitrise-io/go-utils/command
-github.com/bitrise-io/go-utils/errorutil
-github.com/bitrise-io/go-utils/fileutil
-github.com/bitrise-io/go-utils/log
 github.com/bitrise-io/go-utils/pathutil
 github.com/bitrise-io/go-utils/ziputil
 # github.com/bitrise-io/go-utils/v2 v2.0.0-alpha.34
@@ -58,9 +49,6 @@ github.com/hashicorp/go-cleanhttp
 # github.com/hashicorp/go-retryablehttp v0.7.7
 ## explicit; go 1.19
 github.com/hashicorp/go-retryablehttp
-# github.com/hashicorp/go-version v1.7.0
-## explicit
-github.com/hashicorp/go-version
 # github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51
 ## explicit
 github.com/kballard/go-shellquote
